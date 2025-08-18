@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syed Al Mahmud | Futuristic Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  
+  <div class="container">
+    <div class="card white logo" data-panel="about">
+      <h2>SYED<br><span style="font-size: 1.2rem;">AL MAHMUD</span></h2>
+    </div>
+    <div class="card pink skills" data-panel="skills">
+      <span>TECH SKILLS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue education" data-panel="education">
+      <span>EDUCATION</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue projects" data-panel="projects">
+      <span>PROJECTS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card pink involvements" data-panel="involvements">
+      <span>INVOLVEMENTS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card pink research" data-panel="research">
+      <span>RESEARCH</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue github" data-panel="github">
+      <span>GITHUB</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue contact" data-panel="contact">
+      <span>CONTACT</span>
+      <div class="arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Information Panels -->
+  <div class="panel-overlay" id="panelOverlay"></div>
+
+  <div class="info-panel" id="aboutPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">ABOUT ME</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p><strong>Hello_</strong><br>Loading profile...</p>
+      <p>I am Syed Al Mahmud, a third-year Computer Science and Engineering student at AIUB.</p>
+      <p>I focus on software and game development, creating efficient algorithms and interactive applications.</p>
+      
+      <h3>Personal Details</h3>
+      <ul>
+        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
+        <li><strong>Birthdate:</strong> 31 October 2001</li>
+        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
+        <li><strong>Current Status:</strong> Student at AIUB (3rd-year CSE)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="skillsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">TECHNICAL SKILLS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Programming Languages</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">C++</span>
+        <span class="tech-tag">C#</span>
+        <span class="tech-tag">Java</span>
+        <span class="tech-tag">Python</span>
+      </div>
+      
+      <h3>Frontend Development</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">HTML</span>
+        <span class="tech-tag">CSS</span>
+        <span class="tech-tag">JavaScript</span>
+        <span class="tech-tag">TypeScript</span>
+        <span class="tech-tag">React</span>
+      </div>
+      
+      <h3>Backend & Databases</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">Node.js</span>
+        <span class="tech-tag">.NET</span>
+        <span class="tech-tag">MySQL</span>
+      </div>
+      
+      <h3>Game Development</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">OpenGL</span>
+        <span class="tech-tag">Unity</span>
+      </div>
+      
+      <h3>DevOps & Tools</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">Docker</span>
+        <span class="tech-tag">Google Cloud</span>
+        <span class="tech-tag">Git</span>
+        <span class="tech-tag">GitHub</span>
+        <span class="tech-tag">GitLab</span>
+        <span class="tech-tag">Linux</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="educationPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">EDUCATION</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <div class="timeline-item">
+        <span class="timeline-date">2023 – Present</span>
+        <span class="timeline-title">American International University-Bangladesh (AIUB)</span>
+        <p>B.Sc. in Computer Science & Engineering</p>
+        <p>Focus on software development, algorithms, and systems design</p>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="timeline-date">2019 – 2021</span>
+        <span class="timeline-title">Sherpur Govt. University College, Sherpur</span>
+        <p>Higher Secondary Certificate (Science)</p>
+        <p>Physics, Math, ICT</p>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="timeline-date">2017 – 2019</span>
+        <span class="timeline-title">Nabarun Public School, Sherpur</span>
+        <p>Secondary School Certificate (Science)</p>
+        <p>Developed early interest in computing</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="projectsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">PROJECTS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p>Projects dynamically loaded from GitHub</p>
+      <div class="tech-stack">
+        <span class="tech-tag">Game Development</span>
+        <span class="tech-tag">Web Applications</span>
+        <span class="tech-tag">Algorithms</span>
+        <span class="tech-tag">Interactive Systems</span>
+      </div>
+      <h3>Coming Soon...</h3>
+      <p>My GitHub projects will be displayed here automatically</p>
+    </div>
+  </div>
+
+  <div class="info-panel" id="involvementsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">INVOLVEMENTS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Nanotechnology Poster</h3>
+      <p><strong>Topic:</strong> Nanotechnology: Unlocking the Potential of the Microscopic World</p>
+      <p><strong>Award:</strong> Best Poster – Physics Poster Contest, AIUB (2023)</p>
+      
+      <h4>Contributions:</h4>
+      <ul>
+        <li>Explored nanotech uses in medicine, electronics, and energy</li>
+        <li>Summarized key milestones and future outlook</li>
+        <li>Delivered presentation at AIUB</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="researchPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">RESEARCH PAPER</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>From Curiosity to Career: Why Students Choose Computer Science</h3>
+      
+      <h4>Contributions:</h4>
+      <ul>
+        <li>Surveyed AIUB CS students</li>
+        <li>Analyzed career motivations</li>
+        <li>Identified key decision factors</li>
+        <li>Explored future tech aspirations</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="githubPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">GITHUB CONTRIBUTIONS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p>Visual contribution grid from GitHub</p>
+      <div class="tech-stack">
+        <span class="tech-tag">mahito-0</span>
+      </div>
+      <h3>My Activity</h3>
+      <p>GitHub contribution calendar and stats will be displayed here</p>
+    </div>
+  </div>
+
+  <div class="info-panel" id="contactPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">CONTACT ME</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Direct Contact</h3>
+      <ul>
+        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
+        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
+      </ul>
+      
+      <h3>Social Profiles</h3>
+      <div class="social-links">
+        <a href="https://github.com/mahito-0" class="social-link" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/syed-al-mahmud" class="social-link" target="_blank">LinkedIn</a>
+        <a href="#" class="social-link" target="_blank">Facebook</a>
+        <a href="https://instagram.com/not.end.masoom" class="social-link" target="_blank">Instagram</a>
+      </div>
+      
+      <div class="tech-stack" style="margin-top: 30px;">
+        <span class="tech-tag">Student at AIUB</span>
+        <span class="tech-tag">CSE 3rd Year</span>
+        <span class="tech-tag">Game Developer</span>
+        <span class="tech-tag">Software Engineer</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
