@@ -1,179 +1,670 @@
-// Create floating particles
-const particlesContainer = document.getElementById('particles');
-const particleCount = 50;
+    // ========= MAIN INITIALIZATION =========
+    document.addEventListener('DOMContentLoaded', () => {
+      setupTheme();                  // Dark/Light theme with persistence
+      setupResponsiveFontSize();
+      setupSmoothScrolling();
+      setupContactForm();
+      setupCustomCursor();
+      setupImageModal();
+      setupTypingAnimation();
+      fetchGitHubProjects('mahito-0');
+      loadGitHubContributions('mahito-0');
+      setInterval(() => loadGitHubContributions('mahito-0'), 1000 * 60 * 30);
 
-for (let i = 0; i < particleCount; i++) {
-  const particle = document.createElement('div');
-  particle.classList.add('particle');
-  
-  // Random properties
-  const size = Math.random() * 3 + 1;
-  const posX = Math.random() * 100;
-  const posY = Math.random() * 100;
-  const delay = Math.random() * 5;
-  const duration = Math.random() * 5 + 5;
-  
-  particle.style.width = `${size}px`;
-  particle.style.height = `${size}px`;
-  particle.style.left = `${posX}%`;
-  particle.style.top = `${posY}%`;
-  particle.style.animationDelay = `${delay}s`;
-  particle.style.animationDuration = `${duration}s`;
-  
-  particlesContainer.appendChild(particle);
-}
+      window.addEventListener('scroll', handleScrollEffects, { passive: true });
 
-// Panel functionality
-const cards = document.querySelectorAll('.card');
-const panelOverlay = document.getElementById('panelOverlay');
-const closeButtons = document.querySelectorAll('.close-btn');
-const container = document.querySelector('.container');
+      createParticles();
+      initPanels();
+      setupSkillsCarousel(); // Initialize the skills carousel
 
-cards.forEach(card => {
-  card.addEventListener('click', () => {
-    const panelId = card.getAttribute('data-panel') + 'Panel';
-    const panel = document.getElementById(panelId);
-    
-    // Blur main container
-    container.classList.add('blur');
-    
-    // Show overlay and panel
-    panelOverlay.classList.add('active');
-    panel.classList.add('active');
-    
-    // Prevent scrolling
-    document.body.style.overflow = 'hidden';
-  });
-});
-
-// Close panel functionality
-function closeAllPanels() {
-  const panels = document.querySelectorAll('.info-panel');
-  
-  panels.forEach(panel => {
-    panel.classList.remove('active');
-  });
-  
-  panelOverlay.classList.remove('active');
-  container.classList.remove('blur');
-  document.body.style.overflow = '';
-}
-
-closeButtons.forEach(button => {
-  button.addEventListener('click', closeAllPanels);
-});
-
-panelOverlay.addEventListener('click', closeAllPanels);
-
-// Close with ESC key
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeAllPanels();
-  }
-});
-
-// Typewriter effect for the "Loading profile..." text
-const loadingText = document.querySelector('#aboutPanel .panel-content p:first-child strong');
-if (loadingText) {
-  const text = "Hello_";
-  let i = 0;
-  loadingText.textContent = "";
-  
-  function typeWriter() {
-    if (i < text.length) {
-      loadingText.textContent += text.charAt(i);
-      i++;
-      setTimeout(typeWriter, 100);
-    } else {
-      loadingText.textContent = text;
-      // Add blinking cursor effect
-      loadingText.innerHTML += '<span class="blinking-cursor">|</span>';
-    }
-  }
-  
-  typeWriter();
-}
-
-// Replace with your GitHub username
-const githubUsername = 'mahito-0';
-
-// Function to fetch GitHub projects
-async function fetchGitHubProjects() {
-  try {
-    const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&direction=desc`);
-    const repos = await response.json();
-    
-    const projectsPanel = document.querySelector('#projectsPanel .panel-content');
-    
-    // Clear the "Coming Soon" message if it exists
-    const comingSoonHeading = projectsPanel.querySelector('h3');
-    const comingSoonPara = projectsPanel.querySelector('p:last-of-type');
-    if (comingSoonHeading && comingSoonPara) {
-      comingSoonHeading.remove();
-      comingSoonPara.remove();
-    }
-    
-    // Check if projects container already exists
-    let projectsContainer = projectsPanel.querySelector('.projects-container');
-    if (!projectsContainer) {
-      projectsContainer = document.createElement('div');
-      projectsContainer.className = 'projects-container';
-      projectsPanel.appendChild(projectsContainer);
-    } else {
-      // Clear existing projects if refreshing
-      projectsContainer.innerHTML = '';
-    }
-    
-    // Add each project
-    repos.forEach(repo => {
-      if (!repo.fork && !repo.archived) { // Only show non-forked, non-archived repositories
-        const projectCard = document.createElement('div');
-        projectCard.className = 'project-card';
-        
-        // Format the updated date
-        const updatedDate = new Date(repo.updated_at);
-        const formattedDate = updatedDate.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
-        
-        projectCard.innerHTML = `
-          <h4><a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${repo.name}</a></h4>
-          <p>${repo.description || 'No description provided'}</p>
-          <div class="repo-meta">
-            <span>⭐ ${repo.stargazers_count}</span>
-            <span>🔄 ${formattedDate}</span>
-            <span>📌 ${repo.language || 'Various'}</span>
-          </div>
-        `;
-        
-        projectsContainer.appendChild(projectCard);
-      }
+      // Recreate particles on resize (debounced)
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(createParticles, 200);
+        if (window.emailjs?.init) {
+          emailjs.init("S1gRkblDQXsFDT-SG"); 
+        }
+      }, { passive: true });
     });
-    
-    // If no projects were added (all are forks or archived)
-    if (projectsContainer.children.length === 0) {
-      projectsContainer.innerHTML = '<p>No public repositories found.</p>';
+
+    // ==================== THEME (DARK/LIGHT) ====================
+    function setupTheme() {
+      const btn = document.getElementById('themeToggle');
+      const saved = localStorage.getItem('theme');
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      const initial = saved || (prefersLight ? 'light' : 'dark');
+      applyTheme(initial);
+
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('theme', next);
+      });
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        btn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+        updateMetaThemeColor(theme === 'dark' ? '#161616' : '#f6f8fb');
+      }
+
+      function updateMetaThemeColor(color) {
+        let meta = document.querySelector('meta[name="theme-color"]');
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('name', 'theme-color');
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', color);
+      }
     }
-    
-  } catch (error) {
-    console.error('Error fetching GitHub projects:', error);
-    const projectsPanel = document.querySelector('#projectsPanel .panel-content');
-    const errorElement = document.createElement('p');
-    errorElement.textContent = 'Failed to load projects. Please try again later.';
-    errorElement.style.color = '#ff6b6b';
-    projectsPanel.appendChild(errorElement);
-  }
-}
 
-// Call the function when the projects panel is opened
-document.querySelector('.card.projects').addEventListener('click', fetchGitHubProjects);
+    // ==================== RESPONSIVE FONT ====================
+    function setupResponsiveFontSize() {
+      const setResponsiveFontSize = () => {
+        const isMobile = window.innerWidth <= 768;
+        document.documentElement.style.setProperty('--font-size-base', isMobile ? '14px' : '16px');
+      };
+      setResponsiveFontSize();
+      window.addEventListener('resize', setResponsiveFontSize, { passive: true });
+    }
 
-// Also fetch when the panel is already open and user clicks the header (for refresh)
-document.querySelector('#projectsPanel .panel-header').addEventListener('click', function(e) {
-  // Only trigger if clicking directly on the header (not the close button)
-  if (e.target === this || e.target.classList.contains('panel-title')) {
-    fetchGitHubProjects();
-  }
-});
+    // ==================== SMOOTH SCROLL ====================
+    function setupSmoothScrolling() {
+      const supportsSmoothScroll = 'scrollBehavior' in document.documentElement.style;
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          const targetElem = document.querySelector(targetId);
+          if (!targetElem) return;
+          e.preventDefault();
+          const targetPosition = targetElem.getBoundingClientRect().top + window.pageYOffset;
+          if (supportsSmoothScroll) window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+          else smoothScrollPolyfill(targetPosition, 800);
+          targetElem.setAttribute('tabindex', '-1');
+          targetElem.focus();
+        });
+      });
+      function smoothScrollPolyfill(targetPosition, duration) {
+        const startPosition = window.pageYOffset; const distance = targetPosition - startPosition; let startTime = null;
+        function animation(currentTime) {
+          if (startTime === null) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
+          window.scrollTo(0, run);
+          if (timeElapsed < duration) requestAnimationFrame(animation);
+        }
+        function easeInOutQuad(t, b, c, d) { t /= d / 2; if (t < 1) return c / 2 * t * t + b; t--; return -c / 2 * (t * (t - 2) - 1) + b; }
+        requestAnimationFrame(animation);
+      }
+    }
+
+    // ==================== GITHUB FETCH ====================
+    async function fetchGitHubProjects(username) {
+      const projectsList = document.getElementById('projects-list');
+      const cardTemplate = document.getElementById('card-template');
+      if (!projectsList || !cardTemplate) return;
+
+      const cacheKey = `gh-repos:${username}`;
+      const ttlMs = 6 * 60 * 60 * 1000; // 6 hours
+      let renderedFromCache = false;
+
+      function renderRepos(reposRaw) {
+        let repos = Array.isArray(reposRaw) ? reposRaw : [];
+        repos = repos.filter(r => !r.fork && !r.archived)
+                     .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+        projectsList.innerHTML = '';
+
+        if (!repos.length) {
+          projectsList.innerHTML = '<p>No public repositories found.</p>';
+          return;
+        }
+
+        const placeholder = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#00f7ff"/><stop offset="1" stop-color="#ff00f7"/></linearGradient></defs>
+            <rect width="100%" height="100%" fill="#101525" />
+            <rect x="12" y="12" width="376" height="201" rx="8" fill="url(#g)" opacity="0.12" />
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#2b3d52" font-family="Montserrat, sans-serif" font-size="18">No preview image</text>
+          </svg>
+        `);
+
+        for (const repo of repos) {
+          const card = document.importNode(cardTemplate.content, true);
+          const el = card.querySelector('.project-card');
+
+          el.querySelector('.repo-link-title').textContent = repo.name || 'Repository';
+
+          const link = el.querySelector('.repo-link');
+          link.href = repo.html_url;
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'View on GitHub';
+
+          const desc = el.querySelector('.repo-description');
+          desc.textContent = repo.description || 'No description available';
+
+          el.querySelector('.repo-stars').textContent = `⭐ ${repo.stargazers_count ?? 0}`;
+          el.querySelector('.repo-forks').textContent = `🍴 ${repo.forks_count ?? 0}`;
+
+          const meta = el.querySelector('.project-meta');
+          const updated = document.createElement('span');
+          updated.className = 'badge dates';
+          updated.textContent = `📅 Updated: ${repo.updated_at ? new Date(repo.updated_at).toLocaleDateString() : 'N/A'}`;
+          meta.appendChild(updated);
+
+          if (repo.language) {
+            const lang = document.createElement('span');
+            lang.className = 'badge';
+            lang.textContent = `💻 ${repo.language}`;
+            meta.appendChild(lang);
+          }
+
+          const img = el.querySelector('.project-image img');
+          const imageUrl = `https://raw.githubusercontent.com/${username}/${repo.name}/main/img/proimg.png`;
+          img.alt = `${repo.name} preview`;
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.src = imageUrl;
+          img.onerror = () => { img.src = placeholder; };
+
+          projectsList.appendChild(card);
+        }
+      }
+
+      // Try cache first
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { ts, data } = JSON.parse(cached);
+          if (Date.now() - ts < ttlMs) {
+            renderRepos(data);
+            renderedFromCache = true;
+            return; // valid cache, skip network
+          }
+        }
+      } catch (e) {
+        // ignore cache errors
+      }
+
+      projectsList.innerHTML = '<p style="opacity:.8" role="status" aria-live="polite">Loading projects…</p>';
+
+      const url = `https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&type=owner&sort=updated&direction=desc`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        });
+
+        if (response.status === 403) {
+          const reset = response.headers.get('x-ratelimit-reset');
+          const resetDate = reset ? new Date(parseInt(reset, 10) * 1000) : null;
+          const msg = resetDate ? `GitHub API rate limit exceeded. Try again after ${resetDate.toLocaleTimeString()}.` : 'GitHub API rate limit exceeded. Try again later.';
+
+          // Try stale cache if available
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            try {
+              const { data } = JSON.parse(cached);
+              renderRepos(data);
+              projectsList.insertAdjacentHTML('afterbegin', `<p style="color:#ffcd70">Showing cached projects due to API limit. ${msg}</p>`);
+              return;
+            } catch {}
+          }
+
+          throw new Error(msg);
+        }
+
+        if (!response.ok) {
+          throw new Error(`GitHub API error ${response.status}`);
+        }
+
+        const repos = await response.json();
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: repos }));
+        } catch (e) {
+          // storage might be full or disabled
+        }
+        renderRepos(repos);
+      } catch (error) {
+        console.error('Error fetching GitHub projects:', error);
+        if (!renderedFromCache) {
+          projectsList.innerHTML = `<p style="color:#ff6b6b">${error.message}</p>`;
+        }
+      }
+    }
+
+    // ==================== CONTACT FORM + EMAILJS ====================
+    function setupContactForm() {
+      const form = document.getElementById('contact-form');
+      if (!form) return;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendmail();
+      });
+    }
+
+    function sendmail() {
+      const panel = document.getElementById('contactPanel');
+      const message = panel.querySelector('#message')?.value.trim() || '';
+      const name = panel.querySelector('#name')?.value.trim() || '';
+      const email = panel.querySelector('#email')?.value.trim() || '';
+      const honey = panel.querySelector('#website')?.value || '';
+      const sendButton = panel.querySelector('#sendLetter');
+      const resultMessage = panel.querySelector('.result-message');
+
+      const show = (text, ok = false) => {
+        if (!resultMessage) return;
+        resultMessage.textContent = text;
+        resultMessage.style.display = 'block';
+        resultMessage.style.color = ok ? 'var(--badge-green)' : '#ff6b6b';
+        clearTimeout(resultMessage._timer);
+        resultMessage._timer = setTimeout(() => resultMessage.style.display = 'none', 5000);
+      };
+
+      // Basic validation
+      if (honey) return; // bot
+      if (!name || !email || !message) {
+        show('Please fill out your name, email, and message.');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        show('Please enter a valid email address.');
+        return;
+      }
+
+      // UI state
+      if (sendButton) {
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending…';
+      }
+
+      const finalize = () => {
+        if (sendButton) {
+          sendButton.disabled = false;
+          sendButton.textContent = 'Send';
+        }
+      };
+
+      const templateParams = {
+        from_name: name,
+        reply_to: email,
+        message: message,
+      };
+
+      // Try EmailJS if available
+      if (window.emailjs) {
+        try {
+          if (!emailjs.__inited) {
+            emailjs.init({ publicKey: 'S1gRkblDQXsFDT-SG' }); // your public key
+            emailjs.__inited = true;
+          }
+        } catch (e) {
+          console.warn('EmailJS init failed:', e);
+        }
+
+        emailjs
+          .send('service_zsci4of', 'template_t5wnh4c', templateParams)
+          .then(() => {
+            show('Message sent successfully! ✅', true);
+            const form = document.getElementById('contact-form');
+            form && form.reset();
+            finalize();
+          })
+          .catch((err) => {
+            console.error('EmailJS send error:', err);
+            show('Message failed to send. Please try again later.');
+            finalize();
+          });
+      } else {
+        // Fallback if EmailJS script didn’t load
+        show('Email service is unavailable. Please email me directly: mahmud.agni@gmail.com');
+        finalize();
+      }
+    }
+
+    // ==================== CUSTOM CURSOR ====================
+    function setupCustomCursor() {
+      const cursor = document.querySelector('.custom-cursor');
+      if (!cursor) return;
+
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouch) {
+        cursor.style.display = 'none';
+        return;
+      }
+
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.top = e.clientY + 'px';
+        cursor.style.left = e.clientX + 'px';
+        if (isClickable(e.target)) {
+          cursor.classList.add('clickable-hover');
+        } else {
+          cursor.classList.remove('clickable-hover');
+        }
+      });
+
+      function isClickable(element) {
+        const interactiveSelectors = [
+          'a[href]', 'button', 'input', 'select', 'textarea',
+          '[role="button"]', '[role="link"]', '[contenteditable]',
+          '[tabindex]:not([tabindex="-1"])', 'label', 'video',
+          'audio', 'iframe', '[data-clickable]'
+        ].join(',');
+        return element.matches(interactiveSelectors) || element.closest(interactiveSelectors) !== null;
+      }
+    }
+
+    // ==================== IMAGE MODAL & ZOOM ====================
+    function setupImageModal() {
+      const modal = document.getElementById('img-modal');
+      const modalImg = document.getElementById('modal-img');
+      const closeBtn = document.querySelector('.img-modal-close');
+      if (!(modal && modalImg && closeBtn)) return;
+
+      let scale = 1, isDragging = false, startX = 0, startY = 0, currentX = 0, currentY = 0;
+
+      function initImageModal(img) {
+        img.classList.add('clickable-img');
+        img.addEventListener('click', () => {
+          scale = 1; currentX = 0; currentY = 0;
+          modalImg.style.transform = `translate(0, 0) scale(${scale})`;
+          modal.style.display = 'flex';
+          modal.setAttribute('aria-hidden', 'false');
+          modalImg.src = img.src; modalImg.alt = img.alt || '';
+          modalImg.style.cursor = 'grab';
+        });
+      }
+
+      document.querySelectorAll('.clickable-img').forEach(initImageModal);
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              if (node.classList && node.classList.contains('clickable-img')) initImageModal(node);
+              node.querySelectorAll?.('.clickable-img')?.forEach(initImageModal);
+            }
+          });
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      function closeModal() {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        isDragging = false;
+        modalImg.style.cursor = 'grab';
+        modalImg.classList.remove('dragging');
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+      modalImg.addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.min(Math.max(1, scale + delta), 5);
+        modalImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+      }, { passive: false });
+
+      modalImg.addEventListener('mousedown', e => {
+        if (scale <= 1) return;
+        e.preventDefault();
+        isDragging = true;
+        startX = e.clientX - currentX;
+        startY = e.clientY - currentY;
+        modalImg.style.cursor = 'grabbing';
+        modalImg.classList.add('dragging');
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          modalImg.style.cursor = 'grab';
+          modalImg.classList.remove('dragging');
+        }
+      });
+
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        currentX = e.clientX - startX;
+        currentY = e.clientY - startY;
+        modalImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+      });
+
+      // Touch support
+      let lastTouchDist = null, lastTouchX = null, lastTouchY = null;
+      modalImg.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) {
+          lastTouchDist = getTouchDist(e.touches);
+        } else if (e.touches.length === 1 && scale > 1) {
+          lastTouchX = e.touches[0].clientX - currentX;
+          lastTouchY = e.touches[0].clientY - currentY;
+        }
+      }, { passive: false });
+
+      modalImg.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (e.touches.length === 2) {
+          const currentDist = getTouchDist(e.touches);
+          if (lastTouchDist !== null) {
+            let deltaScale = (currentDist - lastTouchDist) / 200;
+            scale = Math.min(Math.max(1, scale + deltaScale), 5);
+            modalImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+          }
+          lastTouchDist = currentDist;
+        } else if (e.touches.length === 1 && scale > 1) {
+          currentX = e.touches[0].clientX - lastTouchX;
+          currentY = e.touches[0].clientY - lastTouchY;
+          modalImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+        }
+      }, { passive: false });
+
+      modalImg.addEventListener('touchend', e => { if (e.touches.length < 2) lastTouchDist = null; });
+
+      function getTouchDist(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.hypot(dx, dy);
+      }
+    }
+
+    // ==================== TYPING ====================
+    function setupTypingAnimation() {
+      const typingText = document.getElementById('typingText');
+      if (!typingText) return;
+
+      const lines = [
+        "Software Developer",
+        "Web Developer",
+        "App Developer",
+        "AI/ML Enthusiast",
+        "Game Developer",
+        "Tech Learner",
+        "Algorithm Explorer",
+        "System Enthusiast",
+        "Cloud Explorer",
+        "UI/UX Designer"
+      ];
+
+      let lineIndex = 0, charIndex = 0, isDeleting = false;
+      const typingSpeed = 100, pauseBetweenLines = 1500;
+
+      function type() {
+        const currentLine = lines[lineIndex % lines.length];
+
+        if (isDeleting) {
+          typingText.textContent = currentLine.substring(0, charIndex - 1);
+          charIndex--;
+          if (charIndex === 0) {
+            isDeleting = false;
+            lineIndex++;
+            setTimeout(type, typingSpeed);
+          } else {
+            setTimeout(type, typingSpeed / 2);
+          }
+        } else {
+          typingText.textContent = currentLine.substring(0, charIndex + 1);
+          charIndex++;
+          if (charIndex === currentLine.length) {
+            isDeleting = true;
+            setTimeout(type, pauseBetweenLines);
+          } else {
+            setTimeout(type, typingSpeed);
+          }
+        }
+      }
+      type();
+    }
+
+    // ==================== SCROLL EFFECTS ====================
+    function handleScrollEffects() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const parallaxElements = document.querySelectorAll('.parallax');
+      parallaxElements.forEach(el => {
+        const speed = parseFloat(el.getAttribute('data-speed') || '0.5');
+        el.style.backgroundPositionY = `${scrollTop * speed}px`;
+      });
+      const fadeElements = document.querySelectorAll('.fade-in');
+      fadeElements.forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+          el.classList.add('visible');
+        } else {
+          el.classList.remove('visible');
+        }
+      });
+      const header = document.querySelector('header');
+      if (header) {
+        if (scrollTop > 50) header.classList.add('sticky');
+        else header.classList.remove('sticky');
+      }
+    }
+
+    // ==================== GITHUB CONTRIBUTIONS GRID ====================
+    function loadGitHubContributions(username) {
+      const container = document.getElementById('contributions-grid');
+      if (!container) return;
+      const timestamp = new Date().getTime();
+      const url = `https://ghchart.rshah.org/${username}?t=${timestamp}`;
+      container.innerHTML = `<img src="${url}" alt="${username}'s GitHub contributions" loading="lazy" decoding="async" style="max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.03); padding:6px;">`;
+      if (document.documentElement.getAttribute('data-theme') === 'light') {
+        container.firstChild.style.background = '#fff';
+        container.firstChild.style.borderColor = 'rgba(15,23,42,0.12)';
+      }
+    }
+
+    // ==================== PARTICLES ====================
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      if (!particlesContainer) return;
+      particlesContainer.innerHTML = '';
+      const isSmall = window.innerWidth <= 768;
+      const particleCount = isSmall ? 24 : 50;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        const size = Math.random() * 3 + 1;
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        const delay = Math.random() * 5;
+        const duration = Math.random() * 5 + 5;
+
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${posX}%`;
+        particle.style.top = `${posY}%`;
+        particle.style.animationDelay = `${delay}s`;
+        particle.style.animationDuration = `${duration}s`;
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // ==================== PANELS ====================
+    function initPanels() {
+      const cards = document.querySelectorAll('.card');
+      const panelOverlay = document.getElementById('panelOverlay');
+      const closeButtons = document.querySelectorAll('.close-btn');
+      const container = document.querySelector('.container');
+
+      // Make cards keyboard focusable and act like buttons
+      cards.forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.addEventListener('click', () => openPanel(card));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPanel(card);
+          }
+        });
+      });
+
+      function openPanel(card) {
+        const panelId = card.getAttribute('data-panel') + 'Panel';
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+        container.classList.add('blur');
+        panelOverlay.classList.add('active');
+        panel.classList.add('active');
+        panelOverlay.setAttribute('aria-hidden', 'false');
+        panel.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        // Focus the close button for accessibility
+        const close = panel.querySelector('.close-btn');
+        close && close.focus();
+      }
+
+      function closeAllPanels() {
+        const panels = document.querySelectorAll('.info-panel');
+        panels.forEach(panel => {
+          panel.classList.remove('active');
+          panel.setAttribute('aria-hidden', 'true');
+        });
+        panelOverlay.classList.remove('active');
+        panelOverlay.setAttribute('aria-hidden', 'true');
+        container.classList.remove('blur');
+        document.body.style.overflow = '';
+      }
+
+      closeButtons.forEach(button => button.addEventListener('click', closeAllPanels));
+      panelOverlay.addEventListener('click', closeAllPanels);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllPanels(); });
+    }
+
+    // ==================== SKILLS CAROUSEL ====================
+    function setupSkillsCarousel() {
+      const tracks = document.querySelectorAll('#skillsPanel .skills-track .skills-inner');
+
+      tracks.forEach(track => {
+        if (!track) return;
+
+        // If not long enough, clone items to make the loop feel seamless
+        if (track.children.length < 30) {
+          const itemsHTML = track.innerHTML;
+          track.innerHTML = itemsHTML + itemsHTML + itemsHTML; // triple for smoothness
+        }
+
+        // Duration scales with item count so speed feels consistent
+        const perItem = 1.8; // seconds per item
+        const duration = Math.max(30, Math.round(track.children.length * perItem));
+        track.style.animationDuration = `${duration}s`;
+      });
+
+      // Pause on hover
+      const carousel = document.querySelector('#skillsPanel .skills-carousel');
+      if (carousel) {
+        carousel.addEventListener('mouseenter', () => {
+          carousel.querySelectorAll('.skills-inner').forEach(el => el.style.animationPlayState = 'paused');
+        });
+        carousel.addEventListener('mouseleave', () => {
+          carousel.querySelectorAll('.skills-inner').forEach(el => el.style.animationPlayState = 'running');
+        });
+      }
+    }

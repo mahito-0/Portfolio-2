@@ -3,122 +3,222 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Syed Al Mahmud | Futuristic Portfolio</title>
+  <title>Syed Al Mahmud | Portfolio</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+
+<!-- EmailJS SDK v4 -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+
 </head>
 <body>
+  <!-- Background particles -->
   <div class="particles" id="particles"></div>
+
+  <!-- Hidden on touch devices -->
+  <div class="custom-cursor"></div>
   
-  <div class="container">
-    <div class="card white logo" data-panel="about">
-      <h2>SYED<br><span style="font-size: 1.2rem;">AL MAHMUD</span></h2>
+  <h1 class="page-title" aria-label="Professional Portfolio">Professional Portfolio</h1>
+  <!-- Cards grid -->
+  <div class="container" aria-live="polite">
+    <div class="card logo" data-panel="about" aria-controls="aboutPanel">
+      <h2>SYED AL MAHMUD</h2>
+      <div id="typingText" class="typing-subtitle"></div>
     </div>
-    <div class="card pink skills" data-panel="skills">
+    <div class="card skills" data-panel="skills" aria-controls="skillsPanel">
       <span>TECH SKILLS</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card blue education" data-panel="education">
+    <div class="card education" data-panel="education" aria-controls="educationPanel">
       <span>EDUCATION</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card blue projects" data-panel="projects">
+    <div class="card projects" data-panel="projects" aria-controls="projectsPanel">
       <span>PROJECTS</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card pink involvements" data-panel="involvements">
+    <div class="card involvements" data-panel="involvements" aria-controls="involvementsPanel">
       <span>INVOLVEMENTS</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card pink research" data-panel="research">
+    <div class="card research" data-panel="research" aria-controls="researchPanel">
       <span>RESEARCH</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card blue github" data-panel="github">
+    <div class="card github" data-panel="github" aria-controls="githubPanel">
       <span>GITHUB</span>
       <div class="arrow">→</div>
     </div>
-    <div class="card blue contact" data-panel="contact">
+    <div class="card contact" data-panel="contact" aria-controls="contactPanel">
       <span>CONTACT</span>
       <div class="arrow">→</div>
     </div>
   </div>
 
-  <!-- Information Panels -->
-  <div class="panel-overlay" id="panelOverlay"></div>
+  <!-- Panels -->
+  <div class="panel-overlay" id="panelOverlay" aria-hidden="true"></div>
 
-  <div class="info-panel" id="aboutPanel">
+  <div class="info-panel" id="aboutPanel" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
     <div class="panel-header">
-      <h2 class="panel-title">ABOUT ME</h2>
-      <button class="close-btn">&times;</button>
+      <h2 class="panel-title" id="aboutTitle">ABOUT ME</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
     </div>
     <div class="panel-content">
-      <p><strong>Hello_</strong><br>Loading profile...</p>
-      <p>I am Syed Al Mahmud, a third-year Computer Science and Engineering student at AIUB.</p>
-      <p>I focus on software and game development, creating efficient algorithms and interactive applications.</p>
-      
-      <h3>Personal Details</h3>
-      <ul>
-        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
-        <li><strong>Birthdate:</strong> 31 October 2001</li>
-        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
-        <li><strong>Current Status:</strong> Student at AIUB (3rd-year CSE)</li>
-      </ul>
-    </div>
-  </div>
+      <div class="panel-split">
+        <div>
+          <p><strong>Hello_!!!</strong></p>
+          <p>I, a third-year CSE student at AIUB with a strong focus on software and game development. Passionate about crafting efficient algorithms and developing interactive applications, 
+            I strive to create innovative solutions that combine performance with user engagement.</p>
+          
+          <h3>Personal Details</h3>
+          <ul>
+            <li><strong>Location:</strong> Dhaka, Bangladesh</li>
+            <li><strong>Birthdate:</strong> 31 October 2001</li>
+            <li><strong>Email:</strong><a href="mailto:mahmud.agni@gmail.com"> mahmud.agni@gmail.com</a></li>
+            <li><strong>Current Status:</strong> Student at AIUB (3rd-year CSE)</li>
+          </ul>
+        </div>
 
-  <div class="info-panel" id="skillsPanel">
-    <div class="panel-header">
-      <h2 class="panel-title">TECHNICAL SKILLS</h2>
-      <button class="close-btn">&times;</button>
-    </div>
-    <div class="panel-content">
-      <h3>Programming Languages</h3>
-      <div class="tech-stack">
-        <span class="tech-tag">C++</span>
-        <span class="tech-tag">C#</span>
-        <span class="tech-tag">Java</span>
-        <span class="tech-tag">Python</span>
-      </div>
-      
-      <h3>Frontend Development</h3>
-      <div class="tech-stack">
-        <span class="tech-tag">HTML</span>
-        <span class="tech-tag">CSS</span>
-        <span class="tech-tag">JavaScript</span>
-        <span class="tech-tag">TypeScript</span>
-        <span class="tech-tag">React</span>
-      </div>
-      
-      <h3>Backend & Databases</h3>
-      <div class="tech-stack">
-        <span class="tech-tag">Node.js</span>
-        <span class="tech-tag">.NET</span>
-        <span class="tech-tag">MySQL</span>
-      </div>
-      
-      <h3>Game Development</h3>
-      <div class="tech-stack">
-        <span class="tech-tag">OpenGL</span>
-        <span class="tech-tag">Unity</span>
-      </div>
-      
-      <h3>DevOps & Tools</h3>
-      <div class="tech-stack">
-        <span class="tech-tag">Docker</span>
-        <span class="tech-tag">Google Cloud</span>
-        <span class="tech-tag">Git</span>
-        <span class="tech-tag">GitHub</span>
-        <span class="tech-tag">GitLab</span>
-        <span class="tech-tag">Linux</span>
+        <aside class="panel-media">
+          <div class="media-frame">
+            <img
+              src="img/IMG.jpg"
+              alt="Photo of Syed Al Mahmud"
+              class="clickable-img"
+              data-clickable="true"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 x2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%2300f7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23ff00f7%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23101525%22 /%3E%3Crect x=%2212%22 y=%2212%22 width=%22376%22 height=%22276%22 rx=%228%22 fill=%22url(%23g)%22 opacity=%220.12%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%232b3d52%22 font-family=%22Montserrat, sans-serif%22 font-size=%2216%22%3ENo%20preview%20image%3C/text%3E%3C/svg%3E';"
+            />
+          </div>
+        </aside>
       </div>
     </div>
   </div>
 
-  <div class="info-panel" id="educationPanel">
+  <div class="info-panel" id="skillsPanel" role="dialog" aria-modal="true" aria-labelledby="skillsTitle" aria-hidden="true">
     <div class="panel-header">
-      <h2 class="panel-title">EDUCATION</h2>
-      <button class="close-btn">&times;</button>
+      <h2 class="panel-title" id="skillsTitle">TECHNICAL SKILLS</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel-content">
+      <div class="skills-carousel" aria-label="Skills carousel" role="region">
+        <!-- Top Row (Left to Right) -->
+        <div class="skills-track top-track">
+          <div class="skills-inner">
+            <!-- Programming Languages -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++" title="C++">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" alt="C#" title="C#">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="Java" title="Java">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" title="Python">
+            </div>
+            
+            <!-- Frameworks & Libraries -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opengl/opengl-original.svg" alt="OpenGL" title="OpenGL">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg" alt=".NET" title=".NET">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" title="React">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="Node.js" title="Node.js">
+            </div>
+            
+            <!-- Databases -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="MySQL" title="MySQL">
+            </div>
+            
+            <!-- Duplicates for seamless looping -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++" title="C++">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" alt="C#" title="C#">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="Java" title="Java">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" title="Python">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bottom Row (Right to Left) -->
+        <div class="skills-track bottom-track">
+          <div class="skills-inner">
+            <!-- Web Technologies -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML" title="HTML">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS" title="CSS">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" title="JavaScript">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" alt="TypeScript" title="TypeScript">
+            </div>
+            
+            <!-- DevOps & Cloud -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" title="Docker">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="Google Cloud" title="Google Cloud">
+            </div>
+            
+            <!-- Tools & Platforms -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="Git" title="Git">
+            </div>
+            <div class="skill-item">
+              <img src="https://avatars.githubusercontent.com/u/18677500?v=4" alt="GitHub" title="GitHub">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" alt="GitLab" title="GitLab">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="Linux" title="Linux">
+            </div>
+            
+            <!-- Duplicates for seamless looping -->
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML" title="HTML">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS" title="CSS">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" title="JavaScript">
+            </div>
+            <div class="skill-item">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" alt="TypeScript" title="TypeScript">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="educationPanel" role="dialog" aria-modal="true" aria-labelledby="educationTitle" aria-hidden="true">
+    <div class="panel-header">
+      <h2 class="panel-title" id="educationTitle">EDUCATION</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
     </div>
     <div class="panel-content">
       <div class="timeline-item">
@@ -144,104 +244,216 @@
     </div>
   </div>
 
-  <div class="info-panel" id="projectsPanel">
+  <div class="info-panel" id="projectsPanel" role="dialog" aria-modal="true" aria-labelledby="projectsTitle" aria-hidden="true">
     <div class="panel-header">
-      <h2 class="panel-title">PROJECTS</h2>
-      <button class="close-btn">&times;</button>
+      <h2 class="panel-title" id="projectsTitle">PROJECTS</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
     </div>
     <div class="panel-content">
-      <p>Projects dynamically loaded from GitHub</p>
       <div class="tech-stack">
         <span class="tech-tag">Game Development</span>
         <span class="tech-tag">Web Applications</span>
         <span class="tech-tag">Algorithms</span>
         <span class="tech-tag">Interactive Systems</span>
       </div>
-      <h3>Coming Soon...</h3>
-      <p>My GitHub projects will be displayed here automatically</p>
+      <!-- Dynamic projects grid -->
+      <div id="projects-list" class="projects-container" aria-live="polite"></div>
+      <!-- Template for project cards -->
+      <template id="card-template">
+        <div class="project-card">
+          <div class="project-image">
+            <!-- IMPORTANT: src set dynamically; loading=lazy set via JS -->
+            <img src="" alt="Project image" class="clickable-img"/>
+          </div>
+          <h4 class="repo-link-title"></h4>
+          <p class="repo-description"></p>
+          <div class="project-meta">
+            <span class="repo-stars badge stars"></span>
+            <span class="repo-forks badge forks"></span>
+          </div>
+          <a class="repo-link" href="#" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+      </template>
     </div>
   </div>
 
-  <div class="info-panel" id="involvementsPanel">
+  <div class="info-panel" id="involvementsPanel" role="dialog" aria-modal="true" aria-labelledby="involvementsTitle" aria-hidden="true">
     <div class="panel-header">
-      <h2 class="panel-title">INVOLVEMENTS</h2>
-      <button class="close-btn">&times;</button>
+      <h2 class="panel-title" id="involvementsTitle">INVOLVEMENTS</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
     </div>
     <div class="panel-content">
-      <h3>Nanotechnology Poster</h3>
-      <p><strong>Topic:</strong> Nanotechnology: Unlocking the Potential of the Microscopic World</p>
-      <p><strong>Award:</strong> Best Poster – Physics Poster Contest, AIUB (2023)</p>
-      
-      <h4>Contributions:</h4>
-      <ul>
-        <li>Explored nanotech uses in medicine, electronics, and energy</li>
-        <li>Summarized key milestones and future outlook</li>
-        <li>Delivered presentation at AIUB</li>
-      </ul>
-    </div>
-  </div>
+      <div class="panel-split">
+        <div>
+          <h3>Poster Presentation</h3>
+          <p><strong>Topic:</strong> Nanotechnology: Unlocking the Potential of the Microscopic World</p>
+          <p><strong>Award:</strong> Best Poster – Physics Poster Contest, AIUB (2023)</p>
+          
+          <h4>Contributions:</h4>
+          <ul>
+            <li>Explored nanotech uses in medicine, electronics, and energy</li>
+            <li>Summarized key milestones and future outlook</li>
+            <li>Delivered presentation at AIUB</li>
+          </ul>
+        </div>
 
-  <div class="info-panel" id="researchPanel">
-    <div class="panel-header">
-      <h2 class="panel-title">RESEARCH PAPER</h2>
-      <button class="close-btn">&times;</button>
-    </div>
-    <div class="panel-content">
-      <h3>From Curiosity to Career: Why Students Choose Computer Science</h3>
-      
-      <h4>Contributions:</h4>
-      <ul>
-        <li>Surveyed AIUB CS students</li>
-        <li>Analyzed career motivations</li>
-        <li>Identified key decision factors</li>
-        <li>Explored future tech aspirations</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="info-panel" id="githubPanel">
-    <div class="panel-header">
-      <h2 class="panel-title">GITHUB CONTRIBUTIONS</h2>
-      <button class="close-btn">&times;</button>
-    </div>
-    <div class="panel-content">
-      <p>Visual contribution grid from GitHub</p>
-      <div class="tech-stack">
-        <span class="tech-tag">mahito-0</span>
+        <aside class="panel-media">
+          <div class="media-frame">
+            <img
+              src="img/NanotechPoster.jpg"
+              alt="Nanotechnology poster presented at AIUB"
+              class="clickable-img"
+              data-clickable="true"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 x2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%2300f7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23ff00f7%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23101525%22 /%3E%3Crect x=%2212%22 y=%2212%22 width=%22376%22 height=%22276%22 rx=%228%22 fill=%22url(%23g)%22 opacity=%220.12%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%232b3d52%22 font-family=%22Montserrat, sans-serif%22 font-size=%2216%22%3ENo%20preview%20image%3C/text%3E%3C/svg%3E';"
+            />
+          </div>
+          <div class="caption">Nanotechnology Poster</div>
+          <div class="media-actions">
+            <a
+              href="assets/NanotechPoster.zip"
+              class="download-btn"
+              download
+              aria-label="Download Nanotechnology Poster ZIP"
+              data-clickable="true"
+            >
+              <i class="fa-solid fa-file-zipper" aria-hidden="true"></i>
+              Download ZIP
+            </a>
+          </div>
+        </aside>
       </div>
-      <h3>My Activity</h3>
-      <p>GitHub contribution calendar and stats will be displayed here</p>
     </div>
   </div>
 
-  <div class="info-panel" id="contactPanel">
+  <div class="info-panel" id="researchPanel" role="dialog" aria-modal="true" aria-labelledby="researchTitle" aria-hidden="true">
     <div class="panel-header">
-      <h2 class="panel-title">CONTACT ME</h2>
-      <button class="close-btn">&times;</button>
+      <h2 class="panel-title" id="researchTitle">RESEARCH PAPER</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
     </div>
     <div class="panel-content">
-      <h3>Direct Contact</h3>
-      <ul>
-        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
-        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
-      </ul>
-      
+      <div class="panel-split">
+        <div>
+          <h3>From Curiosity to Career: Why Students Choose Computer Science</h3>
+          <h4>Contributions:</h4>
+          <ul>
+            <li>Surveyed AIUB CS students</li>
+            <li>Analyzed career motivations</li>
+            <li>Identified key decision factors</li>
+            <li>Explored future tech aspirations</li>
+          </ul>
+        </div>
+
+        <aside class="panel-media">
+          <div class="media-frame">
+            <img
+              src="img/ResearchPaper.jpg"
+              alt="Research visuals: survey results and analysis"
+              class="clickable-img"
+              data-clickable="true"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 x2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%2300f7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23ff00f7%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23101525%22 /%3E%3Crect x=%2212%22 y=%2212%22 width=%22376%22 height=%22276%22 rx=%228%22 fill=%22url(%23g)%22 opacity=%220.12%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%232b3d52%22 font-family=%22Montserrat, sans-serif%22 font-size=%2216%22%3ENo%20preview%20image%3C/text%3E%3C/svg%3E';"
+            />
+          </div>
+          <div class="caption">Research visuals</div>
+          <div class="media-actions">
+            <a
+              href="assets/ResearchPaper.zip"
+              class="download-btn"
+              download
+              aria-label="Download Research Paper ZIP"
+              data-clickable="true"
+            >
+              <i class="fa-solid fa-file-zipper" aria-hidden="true"></i>
+              Download ZIP
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="githubPanel" role="dialog" aria-modal="true" aria-labelledby="githubTitle" aria-hidden="true">
+    <div class="panel-header">
+      <h2 class="panel-title" id="githubTitle">GITHUB CONTRIBUTIONS</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>My Activity</h3>
+      <p>GitHub contribution calendar.</p>
+      <div id="contributions-grid" class="fade-in" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="contactPanel" role="dialog" aria-modal="true" aria-labelledby="contactTitle" aria-hidden="true">
+    <div class="panel-header">
+      <h2 class="panel-title" id="contactTitle">CONTACT ME</h2>
+      <button class="close-btn" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="panel-content">
       <h3>Social Profiles</h3>
       <div class="social-links">
-        <a href="https://github.com/mahito-0" class="social-link" target="_blank">GitHub</a>
-        <a href="https://www.linkedin.com/in/syed-al-mahmud" class="social-link" target="_blank">LinkedIn</a>
-        <a href="#" class="social-link" target="_blank">Facebook</a>
-        <a href="https://instagram.com/not.end.masoom" class="social-link" target="_blank">Instagram</a>
+        <a href="https://github.com/mahito-0" class="social-link github" aria-label="GitHub" target="_blank" rel="noopener">
+          <i class="fa-brands fa-github"></i>
+        </a>
+        <a href="https://www.linkedin.com/in/syed-al-mahmud-45a671296/" class="social-link linkedin" aria-label="LinkedIn" target="_blank" rel="noopener">
+          <i class="fa-brands fa-linkedin"></i>
+        </a>
+        <a href="https://facebook.com" class="social-link facebook" aria-label="Facebook" target="_blank" rel="noopener">
+          <i class="fa-brands fa-facebook"></i>
+        </a>
+        <a href="https://www.instagram.com/not.end.masoom/" class="social-link instagram" aria-label="Instagram" target="_blank" rel="noopener">
+          <i class="fa-brands fa-instagram"></i>
+        </a>
       </div>
-      
-      <div class="tech-stack" style="margin-top: 30px;">
-        <span class="tech-tag">Student at AIUB</span>
-        <span class="tech-tag">CSE 3rd Year</span>
-        <span class="tech-tag">Game Developer</span>
-        <span class="tech-tag">Software Engineer</span>
-      </div>
+
+      <h3 style="margin-top: 28px;">Send a Message</h3>
+
+      <form id="contact-form" class="contact-form" novalidate>
+        <article class="letter glass">
+          <div class="side">
+            <p>
+              <label for="message" class="sr-only">Message</label>
+              <textarea id="message" name="message" placeholder="Your message" required minlength="5"></textarea>
+            </p>
+          </div>
+          <div class="side">
+            <p>
+              <label for="name" class="sr-only">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your name" required>
+            </p>
+            <p>
+              <label for="email" class="sr-only">Email</label>
+              <input type="email" id="email" name="email" placeholder="Your email" required>
+            </p>
+
+            <!-- Honeypot (spam trap) -->
+            <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" style="position:absolute; left:-9999px; opacity:0;" aria-hidden="true">
+
+            <p class="send-wrapper">
+              <button id="sendLetter" type="submit">Send</button>
+            </p>
+
+            <p class="result-message" role="status" aria-live="polite"></p>
+          </div>
+        </article>
+      </form>
     </div>
   </div>
+
+  <!-- Image Modal -->
+  <div id="img-modal" aria-modal="true" role="dialog" aria-hidden="true">
+    <div class="img-modal-content">
+      <button class="img-modal-close" aria-label="Close image">&times;</button>
+      <img id="modal-img" alt="Zoomed image"/>
+    </div>
+  </div>
+
+  <!-- Theme toggle: Dark/Light -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
 
   <script src="script.js"></script>
 </body>
