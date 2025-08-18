@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syed Al Mahmud | Futuristic Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet"
+    rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --neon-blue: #00f7ff;
+      --neon-pink: #ff00f7;
+      --deep-space: #0a0e23;
+      --star-light: rgba(255, 255, 255, 0.8);
+      --hologram-blue: rgba(0, 247, 255, 0.15);
+      --hologram-pink: rgba(255, 0, 247, 0.15);
+      --panel-width: 70vw;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--deep-space);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: white;
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--hologram-blue) 0%, transparent 25%),
+        radial-gradient(circle at 80% 70%, var(--hologram-pink) 0%, transparent 25%);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 20px;
+      width: 100%;
+      max-width: 1400px;
+      perspective: 1000px;
+      transition: all 0.5s ease;
+    }
+
+    .container.blur {
+      filter: blur(0px);
+      pointer-events: none;
+    }
+
+    .card {
+      border-radius: 16px;
+      padding: 30px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      animation: fadeInUp 0.8s forwards;
+      position: relative;
+      overflow: hidden;
+
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+      cursor: pointer;
+ 
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+
+      transform: rotate(30deg);
+      z-index: -1;
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.03) rotateX(5deg) rotateY(5deg);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .card:hover::before {
+      animation: shine 1.5s ease;
+    }
+
+
+    .pink h2, .pink .arrow { text-shadow: 0 0 10px var(--neon-pink); }
+    .blue h2, .blue .arrow { text-shadow: 0 0 10px var(--neon-blue); }
+    .white h2 { text-shadow: 0 0 10px white; }
+
+    .arrow {
+      margin-top: 15px;
+      font-size: 24px;
+      font-weight: 300;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover .arrow {
+      transform: translateX(5px);
+    }
+
+    /* Grid Placement */
+    .logo { grid-column: 1/ span 2; grid-row: 1; animation-delay: 0.1s; }
+    .skills { grid-column: 3; grid-row: 1; animation-delay: 0.2s; }
+    .education { grid-column: 4;  grid-row: 1; animation-delay: 0.3s; }
+
+    .projects { grid-column: 1; grid-row: 2 / span 2; animation-delay: 0.4s; }
+    .involvements { grid-column: 2; grid-row: 2; animation-delay: 0.5s; }
+    .research { grid-column: 3; grid-row: 2; animation-delay: 0.6s; }
+    .contact { grid-column: 4; grid-row: 2 / span 2; animation-delay: 0.7s; }
+
+    .github { grid-column: 2/ span 2; grid-row: 3; animation-delay: 0.8s; }
+
+    /* Information Panel */
+    .info-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: var(--panel-width);
+      max-height: 80vh;
+      background: rgba(10, 14, 35, 0);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 50px rgba(255, 255, 255, 0.103);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow-y: auto;
+    }
+
+    .info-panel.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      background: white;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 0;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .close-btn:hover {
+      transform: rotate(90deg);
+    }
+
+    .panel-content {
+      line-height: 1.6;
+    }
+
+    .panel-content h3 {
+      color: wheat;
+      margin-top: 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+    }
+
+    .panel-content p {
+      margin-bottom: 15px;
+    }
+
+    .panel-content ul {
+      padding-left: 20px;
+    }
+
+    .panel-content li {
+      margin-bottom: 8px;
+    }
+
+    .panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .panel-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Typography */
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin: 0;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .white h2 {
+      background: linear-gradient(to right, white, var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .card span {
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+    }
+
+    /* Tech Stack Styles */
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .tech-tag {
+      background: rgba(0, 247, 255, 0.1);
+      color: var(--neon-blue);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(0, 247, 255, 0.3);
+    }
+
+    /* Timeline Styles */
+    .timeline-item {
+      margin-bottom: 25px;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 5px;
+      height: 15px;
+      width: 15px;
+      border-radius: 50%;
+      background: var(--neon-pink);
+    }
+
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 20px;
+      height: calc(100% - 15px);
+      width: 1px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .timeline-item:last-child::after {
+      display: none;
+    }
+
+    .timeline-date {
+      color: var(--neon-blue);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .projects-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.project-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 5px;
+  transition: transform 0.2s;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+}
+
+.project-card h4 {
+  margin: 0 0 10px 0;
+}
+
+.project-card h4 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.project-card p {
+  margin: 0 0 10px 0;
+  color: #ccc;
+  font-size: 0.9em;
+}
+
+.repo-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8em;
+  color: #aaa;
+}
+
+.social-links {
+  display: flex;
+  gap: 20px;
+}
+
+.social-link i {
+  font-size: 24px;
+  color: white;
+  transition: color 0.3s;
+}
+
+.social-link:hover i {
+  color: #00f7ff; /* Neon-blue hover effect */
+}
+
+
+    /* Animations */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) rotateX(20deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+      }
+    }
+
+    @keyframes shine {
+      0% {
+        opacity: 0;
+        transform: rotate(30deg) translate(-30%, -30%);
+      }
+      20% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: rotate(30deg) translate(30%, 30%);
+      }
+    }
+
+    /* Floating particles */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: var(--star-light);
+      border-radius: 50%;
+      animation: twinkle 5s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      :root {
+        --panel-width: 80vw;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .logo { grid-column: 1 / span 2; grid-row: 1; }
+      .skills { grid-column: 1; grid-row: 2; }
+      .education { grid-column: 2; grid-row: 2; }
+      .projects { grid-column: 1; grid-row: 3; }
+      .involvements { grid-column: 2; grid-row: 3; }
+      .research { grid-column: 1; grid-row: 4; }
+      .contact { grid-column: 2; grid-row: 4; }
+      .github { grid-column: 1; grid-row: 5; }
+
+      :root {
+        --panel-width: 90vw;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      
+      .logo, .skills, .education, .projects, 
+      .involvements, .research, .contact, .github {
+        grid-column: 1;
+      }
+      
+      .logo { grid-row: 1; }
+      .skills { grid-row: 2; }
+      .education { grid-row: 3; }
+      .projects { grid-row: 4; }
+      .involvements { grid-row: 5; }
+      .research { grid-row: 6; }
+      .contact { grid-row: 7; }
+      .github { grid-row: 8; }
+
+      .info-panel {
+        padding: 20px;
+      }
+
+      .panel-title {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  
+  <div class="container">
+    <div class="card white logo" data-panel="about">
+      <h2>SYED AL MAHMUD</span></h2>
+    </div>
+    <div class="card pink skills" data-panel="skills">
+      <span>TECH SKILLS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue education" data-panel="education">
+      <span>EDUCATION</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue projects" data-panel="projects">
+      <span>PROJECTS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card pink involvements" data-panel="involvements">
+      <span>INVOLVEMENTS</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card pink research" data-panel="research">
+      <span>RESEARCH</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue github" data-panel="github">
+      <span>GITHUB</span>
+      <div class="arrow">→</div>
+    </div>
+    <div class="card blue contact" data-panel="contact">
+      <span>CONTACT</span>
+      <div class="arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Information Panels -->
+  <div class="panel-overlay" id="panelOverlay"></div>
+
+  <div class="info-panel" id="aboutPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">ABOUT ME</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p><strong>Hello_</strong><br>Loading profile...</p>
+      <p>I am Syed Al Mahmud, a third-year Computer Science and Engineering student at AIUB.</p>
+      <p>I focus on software and game development, creating efficient algorithms and interactive applications.</p>
+      
+      <h3>Personal Details</h3>
+      <ul>
+        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
+        <li><strong>Birthdate:</strong> 31 October 2001</li>
+        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
+        <li><strong>Current Status:</strong> Student at AIUB (3rd-year CSE)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="skillsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">TECHNICAL SKILLS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Programming Languages</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">C++</span>
+        <span class="tech-tag">C#</span>
+        <span class="tech-tag">Java</span>
+        <span class="tech-tag">Python</span>
+      </div>
+      
+      <h3>Frontend Development</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">HTML</span>
+        <span class="tech-tag">CSS</span>
+        <span class="tech-tag">JavaScript</span>
+        <span class="tech-tag">TypeScript</span>
+        <span class="tech-tag">React</span>
+      </div>
+      
+      <h3>Backend & Databases</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">Node.js</span>
+        <span class="tech-tag">.NET</span>
+        <span class="tech-tag">MySQL</span>
+      </div>
+      
+      <h3>Game Development</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">OpenGL</span>
+        <span class="tech-tag">Unity</span>
+      </div>
+      
+      <h3>DevOps & Tools</h3>
+      <div class="tech-stack">
+        <span class="tech-tag">Docker</span>
+        <span class="tech-tag">Google Cloud</span>
+        <span class="tech-tag">Git</span>
+        <span class="tech-tag">GitHub</span>
+        <span class="tech-tag">GitLab</span>
+        <span class="tech-tag">Linux</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="educationPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">EDUCATION</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <div class="timeline-item">
+        <span class="timeline-date">2023 – Present</span>
+        <span class="timeline-title">American International University-Bangladesh (AIUB)</span>
+        <p>B.Sc. in Computer Science & Engineering</p>
+        <p>Focus on software development, algorithms, and systems design</p>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="timeline-date">2019 – 2021</span>
+        <span class="timeline-title">Sherpur Govt. University College, Sherpur</span>
+        <p>Higher Secondary Certificate (Science)</p>
+        <p>Physics, Math, ICT</p>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="timeline-date">2017 – 2019</span>
+        <span class="timeline-title">Nabarun Public School, Sherpur</span>
+        <p>Secondary School Certificate (Science)</p>
+        <p>Developed early interest in computing</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="projectsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">PROJECTS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p>Projects dynamically loaded from GitHub</p>
+      <div class="tech-stack">
+        <span class="tech-tag">Game Development</span>
+        <span class="tech-tag">Web Applications</span>
+        <span class="tech-tag">Algorithms</span>
+        <span class="tech-tag">Interactive Systems</span>
+      </div>
+      <h3>Coming Soon...</h3>
+      <p>My GitHub projects will be displayed here automatically</p>
+    </div>
+  </div>
+
+  <div class="info-panel" id="involvementsPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">INVOLVEMENTS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Nanotechnology Poster</h3>
+      <p><strong>Topic:</strong> Nanotechnology: Unlocking the Potential of the Microscopic World</p>
+      <p><strong>Award:</strong> Best Poster – Physics Poster Contest, AIUB (2023)</p>
+      
+      <h4>Contributions:</h4>
+      <ul>
+        <li>Explored nanotech uses in medicine, electronics, and energy</li>
+        <li>Summarized key milestones and future outlook</li>
+        <li>Delivered presentation at AIUB</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="researchPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">RESEARCH PAPER</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>From Curiosity to Career: Why Students Choose Computer Science</h3>
+      
+      <h4>Contributions:</h4>
+      <ul>
+        <li>Surveyed AIUB CS students</li>
+        <li>Analyzed career motivations</li>
+        <li>Identified key decision factors</li>
+        <li>Explored future tech aspirations</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-panel" id="githubPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">GITHUB CONTRIBUTIONS</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <p>Visual contribution grid from GitHub</p>
+      <div class="tech-stack">
+        <span class="tech-tag">mahito-0</span>
+      </div>
+      <h3>My Activity</h3>
+      <p>GitHub contribution calendar and stats will be displayed here</p>
+    </div>
+  </div>
+
+  <div class="info-panel" id="contactPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">CONTACT ME</h2>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="panel-content">
+      <h3>Direct Contact</h3>
+      <ul>
+        <li><strong>Email:</strong> mahmud.agni@gmail.com</li>
+        <li><strong>Location:</strong> Dhaka, Bangladesh</li>
+      </ul>
+      
+      <h3>Social Profiles</h3>
+  <div class="social-links">
+  <a href="https://github.com/mahito-0" class="social-link" target="_blank">
+    <i class="fab fa-github"></i>
+  </a>
+  <a href="https://www.linkedin.com/in/syed-al-mahmud-45a671296/" class="social-link" target="_blank">
+    <i class="fab fa-linkedin"></i>
+  </a>
+  <a href="#" class="social-link" target="_blank">
+    <i class="fab fa-facebook"></i>
+  </a>
+  <a href="https://instagram.com/not.end.masoom" class="social-link" target="_blank">
+    <i class="fab fa-instagram"></i>
+  </a>
+</div>
+      
+      <div class="tech-stack" style="margin-top: 30px;">
+        <span class="tech-tag">Student at AIUB</span>
+        <span class="tech-tag">CSE 3rd Year</span>
+        <span class="tech-tag">Game Developer</span>
+        <span class="tech-tag">Software Engineer</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create floating particles
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 50;
+    
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      
+      // Random properties
+      const size = Math.random() * 3 + 1;
+      const posX = Math.random() * 100;
+      const posY = Math.random() * 100;
+      const delay = Math.random() * 5;
+      const duration = Math.random() * 5 + 5;
+      
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.left = `${posX}%`;
+      particle.style.top = `${posY}%`;
+      particle.style.animationDelay = `${delay}s`;
+      particle.style.animationDuration = `${duration}s`;
+      
+      particlesContainer.appendChild(particle);
+    }
+    
+    // Panel functionality
+    const cards = document.querySelectorAll('.card');
+    const panelOverlay = document.getElementById('panelOverlay');
+    const closeButtons = document.querySelectorAll('.close-btn');
+    const container = document.querySelector('.container');
+    
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const panelId = card.getAttribute('data-panel') + 'Panel';
+        const panel = document.getElementById(panelId);
+        
+        // Blur main container
+        container.classList.add('blur');
+        
+        // Show overlay and panel
+        panelOverlay.classList.add('active');
+        panel.classList.add('active');
+        
+        // Prevent scrolling
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    
+    // Close panel functionality
+    function closeAllPanels() {
+      const panels = document.querySelectorAll('.info-panel');
+      
+      panels.forEach(panel => {
+        panel.classList.remove('active');
+      });
+      
+      panelOverlay.classList.remove('active');
+      container.classList.remove('blur');
+      document.body.style.overflow = '';
+    }
+    
+    closeButtons.forEach(button => {
+      button.addEventListener('click', closeAllPanels);
+    });
+    
+    panelOverlay.addEventListener('click', closeAllPanels);
+    
+    // Close with ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllPanels();
+      }
+    });
+
+    // Typewriter effect for the "Loading profile..." text
+    const loadingText = document.querySelector('#aboutPanel .panel-content p:first-child strong');
+    if (loadingText) {
+      const text = "Hello_";
+      let i = 0;
+      loadingText.textContent = "";
+      
+      function typeWriter() {
+        if (i < text.length) {
+          loadingText.textContent += text.charAt(i);
+          i++;
+          setTimeout(typeWriter, 100);
+        } else {
+          loadingText.textContent = text;
+          // Add blinking cursor effect
+          loadingText.innerHTML += '<span class="blinking-cursor">|</span>';
+        }
+      }
+      
+      typeWriter();
+    }
+
+    // Replace with your GitHub username
+// Replace with your GitHub username
+const githubUsername = 'mahito-0';
+
+// Function to fetch GitHub projects
+async function fetchGitHubProjects() {
+  try {
+    const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&direction=desc`);
+    const repos = await response.json();
+    
+    const projectsPanel = document.querySelector('#projectsPanel .panel-content');
+    
+    // Clear the "Coming Soon" message if it exists
+    const comingSoonHeading = projectsPanel.querySelector('h3');
+    const comingSoonPara = projectsPanel.querySelector('p:last-of-type');
+    if (comingSoonHeading && comingSoonPara) {
+      comingSoonHeading.remove();
+      comingSoonPara.remove();
+    }
+    
+    // Check if projects container already exists
+    let projectsContainer = projectsPanel.querySelector('.projects-container');
+    if (!projectsContainer) {
+      projectsContainer = document.createElement('div');
+      projectsContainer.className = 'projects-container';
+      projectsPanel.appendChild(projectsContainer);
+    } else {
+      // Clear existing projects if refreshing
+      projectsContainer.innerHTML = '';
+    }
+    
+    // Add each project
+    repos.forEach(repo => {
+      if (!repo.fork && !repo.archived) { // Only show non-forked, non-archived repositories
+        const projectCard = document.createElement('div');
+        projectCard.className = 'project-card';
+        
+        // Format the updated date
+        const updatedDate = new Date(repo.updated_at);
+        const formattedDate = updatedDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        projectCard.innerHTML = `
+          <h4><a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${repo.name}</a></h4>
+          <p>${repo.description || 'No description provided'}</p>
+          <div class="repo-meta">
+            <span>⭐ ${repo.stargazers_count}</span>
+            <span>🔄 ${formattedDate}</span>
+            <span>📌 ${repo.language || 'Various'}</span>
+          </div>
+        `;
+        
+        projectsContainer.appendChild(projectCard);
+      }
+    });
+    
+    // If no projects were added (all are forks or archived)
+    if (projectsContainer.children.length === 0) {
+      projectsContainer.innerHTML = '<p>No public repositories found.</p>';
+    }
+    
+  } catch (error) {
+    console.error('Error fetching GitHub projects:', error);
+    const projectsPanel = document.querySelector('#projectsPanel .panel-content');
+    const errorElement = document.createElement('p');
+    errorElement.textContent = 'Failed to load projects. Please try again later.';
+    errorElement.style.color = '#ff6b6b';
+    projectsPanel.appendChild(errorElement);
+  }
+}
+
+// Call the function when the projects panel is opened
+document.querySelector('.card.projects').addEventListener('click', fetchGitHubProjects);
+
+// Also fetch when the panel is already open and user clicks the header (for refresh)
+document.querySelector('#projectsPanel .panel-header').addEventListener('click', function(e) {
+  // Only trigger if clicking directly on the header (not the close button)
+  if (e.target === this || e.target.classList.contains('panel-title')) {
+    fetchGitHubProjects();
+  }
+});
+  </script>
+</body>
+</html>
