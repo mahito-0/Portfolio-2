@@ -65,6 +65,31 @@ html[data-theme="light"] {
   --star-light: rgb(0, 0, 0);
 }
 
+/* Colorful theme overrides */
+html[data-theme="colorful"] {
+  --bg: #010101; /* Near black */
+
+  --text-1: #f0f0f0;
+  --text-2: #d1d1d1;
+  --muted: #a0a0a0;
+
+  --glass-card: rgba(255, 255, 255, 0.04);
+  --glass-panel: rgba(10, 10, 10, 0.8);
+
+  --border-1: rgba(0, 255, 255, 0.4); /* Neon cyan border */
+  --border-2: rgba(0, 255, 255, 0.2);
+  --shadow-1: 0 0 0 rgba(0,0,0,0); /* Remove default shadow, glow will be added */
+  --radius: 16px;
+
+  --accent: #00ffff; /* Neon Cyan */
+  --accent-2: #ff00ff; /* Neon Magenta */
+  --badge-gold: #ffff00; /* Neon Yellow */
+  --badge-green: #00ff00; /* Neon Green */
+  --badge-blue: #00aaff; /* Bright Blue */
+
+  --star-light: #ffffff;
+}
+
 /* ===================== BASE ===================== */
 html { font-size: var(--font-size-base); box-sizing: border-box; }
 *, *::before, *::after { box-sizing: inherit; }
@@ -103,6 +128,19 @@ body {
   color: var(--text-1);
   font-size: clamp(3rem, 1rem + 2.2vw, 2rem);
 }
+.page-subtitle{
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto 10px;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-2);
+  font-size: clamp(1.2rem, 0.8rem + 1.5vw, 1.4rem);
+  opacity: 0.95;
+  transition: color 0.2s ease;
+}
 
 /* ===================== GRID ===================== */
 .container {
@@ -137,6 +175,29 @@ body {
 }
 .card:active { transform: translateY(-2px) scale(0.99); }
 .card:hover { transform: translateY(-6px); border-color: var(--border-1); }
+
+html[data-theme="colorful"] .card {
+  --neon-glow-color: var(--accent); /* Fallback */
+  transition: transform 0.2s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  border: 1px solid var(--neon-glow-color);
+  background: rgba(10, 10, 10, 0.2);
+  box-shadow: 0 0 8px -2px var(--neon-glow-color);
+}
+html[data-theme="colorful"] .card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 20px var(--neon-glow-color), 0 0 35px var(--neon-glow-color) inset;
+  border-color: #fff;
+}
+
+/* Unique card colors for colorful theme */
+html[data-theme="colorful"] .card.logo { --neon-glow-color: #ffffff; }
+html[data-theme="colorful"] .card.skills { --neon-glow-color: #39ff14; } /* Neon Green */
+html[data-theme="colorful"] .card.education { --neon-glow-color: #1f51ff; } /* Neon Blue */
+html[data-theme="colorful"] .card.projects { --neon-glow-color: #ff00ff; } /* Magenta */
+html[data-theme="colorful"] .card.involvements { --neon-glow-color: #ff9900; } /* Neon Orange */
+html[data-theme="colorful"] .card.research { --neon-glow-color: #00ffff; } /* Cyan */
+html[data-theme="colorful"] .card.github { --neon-glow-color: #808080; } /* Grey */
+html[data-theme="colorful"] .card.contact { --neon-glow-color: #ff3131; } /* Neon Red */
 
 /* Arrow */
 .arrow {
@@ -531,6 +592,12 @@ html[data-theme="light"] .custom-cursor { border-color: rgba(0,0,0,0.55); mix-bl
 }
 .theme-toggle:hover { transform: translateY(-2px); }
 
+html[data-theme="colorful"] .theme-toggle {
+  background: linear-gradient(45deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+}
+
 /* ===================== FOCUS ===================== */
 a:focus-visible, button:focus-visible, .card:focus-visible, .social-link:focus-visible, .theme-toggle:focus-visible {
   outline: 2px solid var(--accent);
@@ -744,8 +811,11 @@ html[data-theme="light"] .panel-media .media-frame {
 
   <!-- Hidden on touch devices -->
   <div class="custom-cursor"></div>
-  
+
   <h1 class="page-title" aria-label="Professional Portfolio">Professional Portfolio</h1>
+  <p class="page-subtitle" aria-label="Syed Al Mahmud's professional portfolio showcasing skills, projects, and contact information.">
+  <i class="fas fa-hand-pointer"></i> Click any box to Explore</i>
+</p>
   <!-- Cards grid -->
   <div class="container" aria-live="polite">
     <div class="card logo" data-panel="about" aria-controls="aboutPanel">
@@ -1214,24 +1284,52 @@ html[data-theme="light"] .panel-media .media-frame {
     // ==================== THEME (DARK/LIGHT) ====================
     function setupTheme() {
       const btn = document.getElementById('themeToggle');
-      const saved = localStorage.getItem('theme');
-      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-      const initial = saved || (prefersLight ? 'light' : 'dark');
-      applyTheme(initial);
-
-      btn.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') || 'dark';
-        const next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem('theme', next);
-      });
+      const themes = ['dark', 'light', 'colorful'];
+      const themeIcons = {
+          dark: '🌙',
+          light: '☀️',
+          colorful: '🎨'
+      };
+      const themeLabels = {
+          dark: 'light',
+          light: 'colorful',
+          colorful: 'dark'
+      };
+      const metaColors = {
+          dark: '#161616',
+          light: '#f6f8fb',
+          colorful: '#0f0c29'
+      };
 
       function applyTheme(theme) {
+        if (!themes.includes(theme)) {
+            theme = 'dark'; // Fallback to default
+        }
         document.documentElement.setAttribute('data-theme', theme);
-        btn.textContent = theme === 'dark' ? '🌙' : '☀️';
-        btn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
-        updateMetaThemeColor(theme === 'dark' ? '#161616' : '#f6f8fb');
+        btn.textContent = themeIcons[theme];
+        btn.setAttribute('aria-label', `Switch to ${themeLabels[theme]} mode`);
+        updateMetaThemeColor(metaColors[theme]);
       }
+
+      const saved = localStorage.getItem('theme');
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      let initialTheme = 'dark';
+
+      if (saved && themes.includes(saved)) {
+        initialTheme = saved;
+      } else if (prefersLight) {
+        initialTheme = 'light';
+      }
+      applyTheme(initialTheme);
+
+      btn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const currentIndex = themes.indexOf(currentTheme);
+        const nextIndex = (currentIndex + 1) % themes.length;
+        const nextTheme = themes[nextIndex];
+        applyTheme(nextTheme);
+        localStorage.setItem('theme', nextTheme);
+      });
 
       function updateMetaThemeColor(color) {
         let meta = document.querySelector('meta[name="theme-color"]');
