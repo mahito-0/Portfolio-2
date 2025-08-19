@@ -219,10 +219,11 @@ html[data-theme="light"] .info-panel {
 
 .panel-content { line-height: 1.7; color: var(--text-2); word-break: break-word;}
 .panel-content h3 {
-  color: var(--text-1); margin-top: 18px;
+  color: var(--text-1); margin-top: 10px ; margin-bottom: 6px;
+  font-weight: 600; font-size: 1.3rem;
   font-family: 'Orbitron', sans-serif; font-size: 1.15rem;
 }
-.panel-content p { margin-bottom: 12px; }
+.panel-content p { margin-bottom: 0px; }
 /* Only color normal links inside panels, not social buttons */
 .panel-content a:not(.social-link) {
   color: var(--accent);
@@ -361,7 +362,7 @@ html[data-theme="light"] #contributions-grid img {
 .social-links {
   display: flex;
   gap: 1rem;
-  margin-top: 8px;
+  margin-top: 0px;
   font-size: 1.4rem;
   flex-wrap: wrap;
 }
@@ -384,7 +385,7 @@ html[data-theme="light"] #contributions-grid img {
 
 /* Contact form container */
 .contact-form {
-  margin-top: 14px;
+  margin-top: 0px;
 }
 
 /* Letter layout: 2-column responsive */
