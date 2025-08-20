@@ -651,12 +651,117 @@ function setupSkillsCarousel() {
 }
 
 // ==================== CHAT WIDGET ====================
-function setupChatWidget() {
-  const panel = document.getElementById('chat-panel');
-  const toggle = document.getElementById('chat-toggle');
-  const closeBtn = document.getElementById('chat-close');
-  if (!panel || !toggle || !closeBtn) return;
+(function () {
+  const CONFIG_URL = 'assets/chat-config.json';
 
-  toggle.addEventListener('click', () => { panel.hidden = !panel.hidden; });
-  closeBtn.addEventListener('click', () => { panel.hidden = true; });
-}
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.__chatWidgetBound) return; // prevent double-binding
+    window.__chatWidgetBound = true;
+    setupChatWidget().catch(err => console.error('Chat init failed:', err));
+  });
+
+  async function setupChatWidget() {
+    // Grabbing DOM nodes
+    const panel = document.getElementById('chat-panel');
+    const toggle = document.getElementById('chat-toggle');
+    const closeBtn = document.getElementById('chat-close');
+    const log = document.getElementById('chat-log');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+
+    if (!panel || !toggle || !closeBtn || !log || !form || !input) {
+      console.warn('Chat elements missing in HTML.');
+      return;
+    }
+
+    const state = { cfg: null, messages: [] };
+
+    // Helpers
+    function addMsg(role, text) {
+      const el = document.createElement('div');
+      el.className = `msg ${role === 'user' ? 'user' : 'bot'}`;
+      el.textContent = text;
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function setBusy(busy) {
+      const btn = form.querySelector('button');
+      btn.disabled = busy;
+      btn.textContent = busy ? '...' : 'Send';
+      input.disabled = busy;
+    }
+
+    async function loadConfig() {
+      if (state.cfg) return state.cfg;
+      const r = await fetch(CONFIG_URL, { cache: 'no-store' });
+      if (!r.ok) throw new Error('Missing assets/chat-config.json');
+      const cfg = await r.json();
+      state.cfg = {
+        endpoint: cfg.endpoint,
+        systemPrompt: cfg.systemPrompt || 'You are a helpful assistant.',
+        welcomeMessage: cfg.welcomeMessage || 'Hi! Ask me about this portfolio.',
+        maxHistory: Number(cfg.maxHistory ?? 14)
+      };
+      state.messages = [{ role: 'system', content: state.cfg.systemPrompt }];
+      return state.cfg;
+    }
+
+    // Events
+    toggle.addEventListener('click', async () => {
+      try { await loadConfig(); } catch (e) { console.error(e); }
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden && log.childElementCount === 0) {
+        addMsg('bot', state.cfg?.welcomeMessage || 'Hi!');
+      }
+    });
+
+    closeBtn.addEventListener('click', () => { panel.hidden = true; });
+
+    // Enter to send (Shift+Enter = newline)
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      try { await loadConfig(); } catch (e) {
+        addMsg('bot', 'Chat config not found. Please add assets/chat-config.json with your endpoint.');
+        return;
+      }
+
+      addMsg('user', text);
+      state.messages.push({ role: 'user', content: text });
+      const recent = state.messages.slice(-state.cfg.maxHistory);
+
+      try {
+        setBusy(true);
+        console.log('POST', state.cfg.endpoint);
+        const r = await fetch(state.cfg.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: recent })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          throw new Error(data?.error?.message || JSON.stringify(data) || `HTTP ${r.status}`);
+        }
+        const reply = data.reply || '(no reply)';
+        state.messages.push({ role: 'assistant', content: reply });
+        addMsg('bot', reply);
+      } catch (err) {
+        console.error('Chat error:', err);
+        addMsg('bot', 'Oops—something went wrong. Please try again.');
+      } finally {
+        setBusy(false);
+      }
+    });
+  }
+})();
