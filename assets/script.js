@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   createParticles();
   initPanels();
   setupSkillsCarousel(); // Initialize the skills carousel
-  setupChatWidget();     // Initialize AI chat widget
+  setupChatWidget();    // Initialize AI chat widget
 
   // Recreate particles on resize (debounced)
   let resizeTimeout;
@@ -652,99 +652,11 @@ function setupSkillsCarousel() {
 
 // ==================== CHAT WIDGET ====================
 function setupChatWidget() {
-  const CONFIG_URL = 'assets/chat-config.json';
-
   const panel = document.getElementById('chat-panel');
   const toggle = document.getElementById('chat-toggle');
   const closeBtn = document.getElementById('chat-close');
-  const log = document.getElementById('chat-log');
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('chat-input');
-  if (!panel || !toggle || !closeBtn || !log || !form || !input) return;
+  if (!panel || !toggle || !closeBtn) return;
 
-  const state = { messages: [], cfg: null };
-
-  function addMsg(role, text) {
-    const el = document.createElement('div');
-    el.className = `msg ${role === 'user' ? 'user' : 'bot'}`;
-    el.textContent = text;
-    log.appendChild(el);
-    log.scrollTop = log.scrollHeight;
-  }
-  function setBusy(busy) {
-    const btn = form.querySelector('button');
-    btn.disabled = busy;
-    btn.textContent = busy ? '...' : 'Send';
-    input.disabled = busy;
-  }
-
-  async function loadConfig() {
-    try {
-      const r = await fetch(CONFIG_URL, { cache: 'no-store' });
-      const cfg = await r.json();
-      state.cfg = {
-        endpoint: cfg.endpoint || '/api/chat',
-        systemPrompt: cfg.systemPrompt || "You are a friendly assistant for Syed’s portfolio website.",
-        welcomeMessage: cfg.welcomeMessage || "Hi! Ask me about my projects, skills, education, or contact info.",
-        maxHistory: cfg.maxHistory || 14
-      };
-      state.messages = [{ role: 'system', content: state.cfg.systemPrompt }];
-    } catch (e) {
-      console.warn('chat-config.json missing or invalid. Using defaults.');
-      state.cfg = {
-        endpoint: '/api/chat',
-        systemPrompt: "You are a friendly assistant for Syed’s portfolio website.",
-        welcomeMessage: "Hi! Ask me about my projects, skills, education, or contact info.",
-        maxHistory: 14
-      };
-      state.messages = [{ role: 'system', content: state.cfg.systemPrompt }];
-    }
-  }
-
-  toggle.addEventListener('click', async () => {
-    if (!state.cfg) await loadConfig();
-    panel.hidden = !panel.hidden;
-    if (!panel.hidden && log.childElementCount === 0) {
-      addMsg('bot', state.cfg.welcomeMessage);
-    }
-  });
+  toggle.addEventListener('click', () => { panel.hidden = !panel.hidden; });
   closeBtn.addEventListener('click', () => { panel.hidden = true; });
-
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    }
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    if (!state.cfg) await loadConfig();
-
-    addMsg('user', text);
-    state.messages.push({ role: 'user', content: text });
-    const recent = state.messages.slice(-state.cfg.maxHistory);
-
-    try {
-      setBusy(true);
-      const r = await fetch(state.cfg.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: recent })
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data?.error?.message || data?.error || 'Request failed');
-      const reply = data.reply || '(no reply)';
-      state.messages.push({ role: 'assistant', content: reply });
-      addMsg('bot', reply);
-    } catch (err) {
-      console.error(err);
-      addMsg('bot', 'Oops—something went wrong. Please try again in a moment.');
-    } finally {
-      setBusy(false);
-    }
-  });
 }
