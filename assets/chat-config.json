@@ -1,0 +1,6 @@
+{
+  "endpoint": "https://YOUR-WORKER-SUBDOMAIN.workers.dev/chat",
+  "systemPrompt": "You are a friendly assistant for Syed Al Mahmud’s portfolio website. Keep answers concise and relevant to Syed’s skills, projects, education, research, and contact info. If unsure, ask a clarifying question. Use 1–3 short paragraphs or bullet points.",
+  "welcomeMessage": "Hi! I can answer quick questions about my projects, skills, education, and how to contact me.",
+  "maxHistory": 14
+}

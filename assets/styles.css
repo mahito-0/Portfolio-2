@@ -732,3 +732,59 @@ html[data-theme="light"] .panel-media .media-frame {
   .info-panel { padding: 18px; }
   .panel-title { font-size: 1.3rem; }
 }
+
+/* === Chatbot widget === */
+#chat-widget {
+  position: fixed;
+  bottom: 16px;
+  left: 16px; /* bottom-left to avoid theme toggle on right */
+  z-index: 1200;
+  font-family: 'Montserrat', system-ui, sans-serif;
+}
+#chat-toggle {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--border-1);
+  background: var(--glass-card);
+  color: var(--text-1);
+  font-size: 22px; cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+#chat-panel[hidden] { display: none; }
+#chat-panel {
+  position: fixed;
+  bottom: 80px; left: 16px;
+  width: min(92vw, 360px);
+  max-height: 60vh;
+  background: var(--glass-panel);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  box-shadow: var(--shadow-1);
+  display: flex; flex-direction: column;
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  overflow: hidden;
+}
+#chat-panel .chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; border-bottom: 1px solid var(--border-2);
+  background: rgba(255,255,255,0.02);
+}
+#chat-log {
+  padding: 10px; overflow-y: auto; flex: 1;
+}
+.msg { margin: 6px 0; padding: 8px 10px; border-radius: 10px; max-width: 85%; white-space: pre-wrap; line-height: 1.35; }
+.msg.user { background: rgba(37,99,235,0.15); margin-left: auto; border-top-right-radius: 4px; color: var(--text-1); }
+.msg.bot { background: rgba(255,255,255,0.06); margin-right: auto; border-top-left-radius: 4px; color: var(--text-2); }
+.chat-form { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--border-2); }
+.chat-form input {
+  flex: 1; padding: 10px 12px; border-radius: 8px; outline: none;
+  background: rgba(255,255,255,0.05); color: var(--text-1);
+  border: 1px solid var(--border-1); backdrop-filter: blur(4px);
+}
+.chat-form button {
+  padding: 10px 12px; border: none; border-radius: 8px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #0f1115; font-weight: 800; cursor: pointer;
+}
+html[data-theme="light"] #chat-toggle { background: #fff; }
