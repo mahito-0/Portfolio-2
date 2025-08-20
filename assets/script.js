@@ -651,6 +651,7 @@ function setupSkillsCarousel() {
 }
 
 // ==================== CHAT WIDGET ====================
+// Button-only chat: shows info from assets/site-data.json based on buttons
 (function () {
   const CONFIG_URL = 'assets/chat-config.json';
   const DATA_URL   = 'assets/site-data.json';
@@ -658,182 +659,165 @@ function setupSkillsCarousel() {
   document.addEventListener('DOMContentLoaded', () => {
     if (window.__chatWidgetBound) return;
     window.__chatWidgetBound = true;
-    setupChatWidget().catch(err => console.error('Chat init failed:', err));
+    setupButtonChat().catch(err => console.error('Chat init failed:', err));
   });
 
-  async function setupChatWidget() {
-    // DOM
-    const panel   = document.getElementById('chat-panel');
-    const toggle  = document.getElementById('chat-toggle');
-    const closeBtn= document.getElementById('chat-close');
-    const log     = document.getElementById('chat-log');
-    const form    = document.getElementById('chat-form');
-    const input   = document.getElementById('chat-input');
+  async function setupButtonChat() {
+    // DOM nodes
+    const panel    = document.getElementById('chat-panel');
+    const toggle   = document.getElementById('chat-toggle');
+    const closeBtn = document.getElementById('chat-close');
+    const log      = document.getElementById('chat-log');
+    const actions  = document.getElementById('chat-actions');
+    const form     = document.getElementById('chat-form'); // may be hidden
 
-    if (!panel || !toggle || !closeBtn || !log || !form || !input) {
+    if (!panel || !toggle || !closeBtn || !log || !actions) {
       console.warn('Chat elements missing in HTML.');
       return;
     }
 
-    const state = { cfg: null, messages: [], site: null, flatFacts: [] };
+    const state = { cfg: null, site: null };
 
-    // UI helpers
-    function addMsg(role, text) {
+    // Helpers
+    function addMsg(role, text, isHTML = false) {
       const el = document.createElement('div');
       el.className = `msg ${role === 'user' ? 'user' : 'bot'}`;
-      el.textContent = text;
+      if (isHTML) el.innerHTML = text;
+      else el.textContent = text;
       log.appendChild(el);
       log.scrollTop = log.scrollHeight;
     }
-    function setBusy(busy) {
-      const btn = form.querySelector('button');
-      btn.disabled = busy;
-      btn.textContent = busy ? '...' : 'Send';
-      input.disabled = busy;
-    }
 
-    // Load config and site data
     async function loadConfig() {
       if (state.cfg) return state.cfg;
       const r = await fetch(CONFIG_URL, { cache: 'no-store' });
-      if (!r.ok) throw new Error('Missing assets/chat-config.json');
-      const cfg = await r.json();
-      state.cfg = {
-        endpoint: cfg.endpoint,
-        systemPrompt: cfg.systemPrompt || 'You are a helpful assistant.',
-        welcomeMessage: cfg.welcomeMessage || 'Hi! Ask me about this portfolio.',
-        maxHistory: Number(cfg.maxHistory ?? 14)
+      state.cfg = r.ok ? await r.json() : {
+        systemPrompt: '',
+        welcomeMessage: 'Hi! Choose an option below.'
       };
-      state.messages = [{ role: 'system', content: state.cfg.systemPrompt }];
       return state.cfg;
     }
 
     async function loadSiteData() {
       if (state.site) return state.site;
-      try {
-        const r = await fetch(DATA_URL, { cache: 'no-store' });
-        if (r.ok) {
-          state.site = await r.json();
-          state.flatFacts = flattenFacts(state.site);
-        } else {
-          console.warn('site-data.json not found (optional but recommended).');
-          state.site = null; state.flatFacts = [];
-        }
-      } catch (e) {
-        console.warn('Failed to load site-data.json:', e);
-        state.site = null; state.flatFacts = [];
-      }
+      const r = await fetch(DATA_URL, { cache: 'no-store' });
+      if (!r.ok) throw new Error('site-data.json not found');
+      state.site = await r.json();
       return state.site;
     }
 
-    // Turn site-data into concise fact strings
-    function flattenFacts(d) {
-      if (!d) return [];
-      const arr = [];
-      if (d.name)      arr.push(`Name: ${d.name}`);
-      if (d.location)  arr.push(`Location: ${d.location}`);
-      if (d.email)     arr.push(`Email: ${d.email}`);
-      if (d.status)    arr.push(`Status: ${d.status}`);
-      if (d.focus)     arr.push(`Focus: ${d.focus}`);
-      if (Array.isArray(d.skills) && d.skills.length)
-        arr.push(`Skills: ${d.skills.join(', ')}`);
-      if (Array.isArray(d.education)) {
-        d.education.forEach(e => {
-          arr.push(`Education: ${e.years} — ${e.school}${e.degree ? `, ${e.degree}` : ''}${e.focus ? ` (${e.focus})` : ''}`);
-        });
+    // Render action buttons
+    function renderActions() {
+      const items = [
+        { id: 'about',     label: 'About',     primary: true },
+        { id: 'skills',    label: 'Skills' },
+        { id: 'education', label: 'Education' },
+        { id: 'research',  label: 'Research' },
+        { id: 'poster',    label: 'Poster' },
+        { id: 'contact',   label: 'Contact' },
+        { id: 'github',    label: 'GitHub' },
+        { id: 'socials',   label: 'Socials' }
+        // If you ever want free-text again, add: { id:'ask', label:'Ask AI' }
+      ];
+      actions.innerHTML = '';
+      for (const it of items) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-btn' + (it.primary ? ' primary' : '');
+        btn.dataset.action = it.id;
+        btn.textContent = it.label;
+        actions.appendChild(btn);
       }
-      if (d.poster?.title)
-        arr.push(`Poster: ${d.poster.title}${d.poster.award ? ` — ${d.poster.award}` : ''}`);
-      if (d.research?.title)
-        arr.push(`Research: ${d.research.title}${d.research.summary ? ` — ${d.research.summary}` : ''}`);
-      if (d.githubUser) arr.push(`GitHub user: ${d.githubUser}`);
-      if (d.socials?.github)   arr.push(`GitHub: ${d.socials.github}`);
-      if (d.socials?.linkedin) arr.push(`LinkedIn: ${d.socials.linkedin}`);
-      if (d.socials?.instagram)arr.push(`Instagram: ${d.socials.instagram}`);
-      return arr;
     }
 
-    // Pick the most relevant facts for the user’s query
-    function relevantFacts(query, limit = 8) {
-      if (!state.flatFacts.length) return '';
-      const words = (query || '').toLowerCase().match(/[a-z0-9#.@-]{3,}/g) || [];
-      const score = t => words.reduce((s, w) => s + (t.toLowerCase().includes(w) ? 1 : 0), 0);
-      const ranked = state.flatFacts
-        .map(t => ({ t, s: score(t) }))
-        .sort((a, b) => b.s - a.s || a.t.length - b.t.length);
-      const picked = (ranked[0]?.s ? ranked.filter(x => x.s > 0).slice(0, limit) : ranked.slice(0, 6))
-        .map(x => x.t);
-      const context = picked.join('\n- ');
-      return context ? `Use these portfolio facts:\n- ${context}` : '';
+    // Build responses from site-data
+    function replyFor(id) {
+      const d = state.site || {};
+      const br = '\n';
+      switch (id) {
+        case 'about': {
+          const lines = [
+            d.name ? `Name: ${d.name}` : null,
+            d.status ? `Status: ${d.status}` : null,
+            d.focus ? `Focus: ${d.focus}` : null,
+            d.location ? `Location: ${d.location}` : null
+          ].filter(Boolean);
+          return lines.join(br);
+        }
+        case 'skills': {
+          const skills = Array.isArray(d.skills) ? d.skills.join(', ') : 'N/A';
+          return `Skills:\n• ${skills.replace(/, /g, '\n• ')}`;
+        }
+        case 'education': {
+          const edu = Array.isArray(d.education) ? d.education.map(e =>
+            `• ${e.years} — ${e.school}${e.degree ? `, ${e.degree}` : ''}${e.focus ? ` (${e.focus})` : ''}`
+          ) : ['N/A'];
+          return `Education:\n${edu.join(br)}`;
+        }
+        case 'research': {
+          const title = d.research?.title || 'N/A';
+          const sum   = d.research?.summary ? `\n• ${d.research.summary}` : '';
+          return `Research:\n• ${title}${sum}`;
+        }
+        case 'poster': {
+          const title = d.poster?.title || 'N/A';
+          const award = d.poster?.award ? `\n• ${d.poster.award}` : '';
+          return `Poster:\n• ${title}${award}`;
+        }
+        case 'contact': {
+          const email = d.email ? `<a href="mailto:${d.email}">${d.email}</a>` : 'N/A';
+          return `Email: ${email}`;
+        }
+        case 'github': {
+          const url = d.socials?.github || (d.githubUser ? `https://github.com/${d.githubUser}` : null);
+          if (!url) return 'GitHub: N/A';
+          return `GitHub: <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+        }
+        case 'socials': {
+          const links = [
+            d.socials?.linkedin ? `• <a href="${d.socials.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a>` : null,
+            d.socials?.github   ? `• <a href="${d.socials.github}" target="_blank" rel="noopener noreferrer">GitHub</a>`   : null,
+            d.socials?.facebook ? `• <a href="${d.socials.facebook}" target="_blank" rel="noopener noreferrer">Facebook</a>` : null,
+            d.socials?.instagram? `• <a href="${d.socials.instagram}" target="_blank" rel="noopener noreferrer">Instagram</a>`: null
+          ].filter(Boolean).join('<br>');
+          return links || 'No social links available.';
+        }
+        default:
+          return 'Not available.';
+      }
     }
 
     // Events
     toggle.addEventListener('click', async () => {
-      try { await loadConfig(); } catch (e) { console.error(e); }
-      await loadSiteData();
+      try {
+        await loadConfig();
+        await loadSiteData();
+      } catch (e) {
+        console.error(e);
+      }
       panel.hidden = !panel.hidden;
       if (!panel.hidden && log.childElementCount === 0) {
-        addMsg('bot', state.cfg?.welcomeMessage || 'Hi!');
+        addMsg('bot', state.cfg?.welcomeMessage || 'Hi! Choose an option below.');
+        renderActions();
       }
     });
 
     closeBtn.addEventListener('click', () => { panel.hidden = true; });
 
-    // Enter to send (Shift+Enter = newline)
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
+    actions.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.dataset.action;
+      addMsg('user', btn.textContent);
+      const answer = replyFor(id);
+      const isHTML = /<a\s/i.test(answer);
+      addMsg('bot', answer, isHTML);
+
+      // Re-render actions so the menu stays visible
+      renderActions();
     });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = '';
-
-      try { await loadConfig(); } catch {
-        addMsg('bot', 'Chat config not found. Please add assets/chat-config.json with your endpoint.');
-        return;
-      }
-      await loadSiteData();
-
-      addMsg('user', text);
-      state.messages.push({ role: 'user', content: text });
-
-      // Build a short, relevant context from your site facts
-      const facts      = relevantFacts(text);
-      const baseSystem = state.messages.find(m => m.role === 'system');
-
-      // Keep the context short to save tokens
-      const recent = state.messages.filter(m => m !== baseSystem)
-                                   .slice(-state.cfg.maxHistory + 2);
-
-      const messagesForApi = [
-        baseSystem || { role: 'system', content: state.cfg.systemPrompt },
-        ...(facts ? [{ role: 'system', content: facts }] : []),
-        ...recent
-      ];
-
-      try {
-        setBusy(true);
-        const r = await fetch(state.cfg.endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: messagesForApi })
-        });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data?.error?.message || JSON.stringify(data) || `HTTP ${r.status}`);
-        const reply = data.reply || '(no reply)';
-        state.messages.push({ role: 'assistant', content: reply });
-        addMsg('bot', reply);
-      } catch (err) {
-        console.error('Chat error:', err);
-        addMsg('bot', 'Oops—something went wrong. Please try again.');
-      } finally {
-        setBusy(false);
-      }
-    });
+    // If you kept the form in HTML, keep it hidden (button-only mode)
+    if (form) form.style.display = 'none';
   }
 })();
