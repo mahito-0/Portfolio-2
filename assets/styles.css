@@ -770,30 +770,3 @@ html[data-theme="light"] .panel-media .media-frame {
 .chat-form input { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-1, rgba(255,255,255,0.16)); background: rgba(255,255,255,0.05); color: var(--text-1, #fff); }
 .chat-form button { padding: 10px 12px; border: none; border-radius: 8px; background: linear-gradient(90deg, var(--accent, #9bbcf9), var(--accent-2, #a78bfa)); color: #0f1115; font-weight: 800; cursor: pointer; }
 
-/* Chat actions (button-only mode) */
-.chat-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px;
-  border-top: 1px solid var(--border-2);
-  background: transparent;
-}
-.quick-btn {
-  padding: 8px 12px;
-  border: 1px solid var(--border-1);
-  background: var(--glass-card);
-  color: var(--text-1);
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.92rem;
-  transition: transform .15s ease, border-color .2s ease, background .2s ease;
-}
-.quick-btn:hover { transform: translateY(-1px); border-color: var(--border-1); }
-.quick-btn.primary {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #0f1115; border: none;
-}
-/* Hide the text input form (optional) */
-#chat-panel .chat-form { display: none; }
