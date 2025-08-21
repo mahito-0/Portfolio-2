@@ -757,6 +757,28 @@ html[data-theme="light"] .panel-media .media-frame {
   flex-shrink: 0;
 }
 
+#chat-toggle i {
+  animation: pulse-blink 2s infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#chat-toggle i:hover {
+  animation: none;
+  transform: scale(1.4);
+  box-shadow: var(--shadow-lg);
+}
+
+@keyframes pulse-blink {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
 #chat-panel[hidden] { 
   display: none; 
 }
