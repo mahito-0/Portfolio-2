@@ -1,6 +1,5 @@
 // ========= MAIN INITIALIZATION =========
 document.addEventListener('DOMContentLoaded', () => {
-  setupTheme();                  // Dark/Light theme with persistence
   setupResponsiveFontSize();
   setupSmoothScrolling();
   setupContactForm();
@@ -28,45 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 });
-
-// ==================== THEME (DARK/LIGHT) ====================
-function setupTheme() {
-  const btn = document.getElementById('themeToggle');
-  const themes = ['dark', 'light', 'colorful'];
-  const themeIcons = { dark: '🌙', light: '☀️', colorful: '🎨' };
-  const themeLabels = { dark: 'light', light: 'colorful', colorful: 'dark' };
-  const metaColors = { dark: '#161616', light: '#f6f8fb', colorful: '#0f0c29' };
-
-  function applyTheme(theme) {
-    if (!themes.includes(theme)) theme = 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-    btn.textContent = themeIcons[theme];
-    btn.setAttribute('aria-label', `Switch to ${themeLabels[theme]} mode`);
-    updateMetaThemeColor(metaColors[theme]);
-  }
-
-  const saved = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  let initialTheme = saved && themes.includes(saved) ? saved : (prefersLight ? 'light' : 'dark');
-  applyTheme(initialTheme);
-
-  btn.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const nextTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
-    applyTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-  });
-
-  function updateMetaThemeColor(color) {
-    let meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.setAttribute('name', 'theme-color');
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute('content', color);
-  }
-}
 
 // ==================== RESPONSIVE FONT ====================
 function setupResponsiveFontSize() {

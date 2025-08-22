@@ -27,26 +27,6 @@
   --star-light: rgba(255, 255, 255, 0.8);
 }
 
-/* Light theme overrides */
-html[data-theme="light"] {
-  --bg: #979797;
-
-  --text-1: #0f172a;
-  --text-2: #000000;
-  --muted: #64748b;
-
-  --glass-card: #cecece;
-  --glass-panel: #ffffff;
-
-  --border-1: rgba(15,23,42,0.15);
-  --border-2: rgba(15,23,42,0.08);
-
-  --accent: #2563eb;    /* Blue 600 */
-  --accent-2: #7c3aed;  /* Violet 600 */
-
-  --star-light: rgb(0, 0, 0);
-}
-
 /* ===================== BASE ===================== */
 html { font-size: var(--font-size-base); box-sizing: border-box; }
 *, *::before, *::after { box-sizing: inherit; }
@@ -198,11 +178,6 @@ body {
   justify-self: end;
 }
 
-/* Lighter shadow in light mode */
-html[data-theme="light"] .info-panel {
-  box-shadow: 0 16px 40px rgba(2,6,23,0.12);
-}
-
 .panel-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 14px; border-bottom: 1px solid var(--border-2); padding-bottom: 12px;
@@ -273,10 +248,7 @@ h2 {
   font-size: 0.9rem;
   border: 1px solid var(--border-2);
 }
-html[data-theme="light"] .tech-tag {
-  background: #fff;
-  border-color: var(--border-2);
-}
+
 
 /* ===================== TIMELINE ===================== */
 .timeline-item { margin-bottom: 20px; position: relative; padding-left: 26px; }
@@ -311,14 +283,6 @@ html[data-theme="light"] .tech-tag {
   border-color: var(--border-1);
 
 }
-html[data-theme="light"] .project-card {
-  background: #ffffff;
-  box-shadow: 0 6px 16px rgba(2,6,23,0.06);
-}
-html[data-theme="light"] .project-card:hover {
-  background: #ffffff;
-  border-color: var(--border-1);
-}
 
 .project-image {
   width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 10px;
@@ -344,10 +308,6 @@ html[data-theme="light"] .project-card:hover {
 .forks { color: var(--badge-green); }
 .dates { color: var(--badge-blue); }
 
-/* Contributions grid */
-html[data-theme="light"] #contributions-grid img {
-  filter: invert(1) hue-rotate(180deg);
-}
 
 /* ===================== SOCIAL LINKS ===================== */
 /* Utility: screen-reader-only */
@@ -482,9 +442,6 @@ html[data-theme="light"] #contributions-grid img {
   border: 1px solid var(--border-1); backdrop-filter: blur(3px);
   padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; min-height: 44px;
 }
-html[data-theme="light"] #img-modal .img-modal-content { background: #fff; }
-html[data-theme="light"] .img-modal-close { background: #fff; color: var(--text-1); }
-
 /* ===================== CUSTOM CURSOR ===================== */
 .custom-cursor {
   position: fixed; top: 0; left: 0;
@@ -494,7 +451,6 @@ html[data-theme="light"] .img-modal-close { background: #fff; color: var(--text-
   z-index: 2000; mix-blend-mode: difference;
 }
 .custom-cursor.clickable-hover { width: 26px; height: 26px; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.55); }
-html[data-theme="light"] .custom-cursor { border-color: rgba(0,0,0,0.55); mix-blend-mode: normal; }
 
 /* ===================== CONTACT FORM ===================== */
 .contact-form { margin-top: 14px; display: grid; gap: 10px; }
@@ -692,10 +648,6 @@ a:focus-visible, button:focus-visible, .card:focus-visible, .social-link:focus-v
 }
 .download-btn:hover {
   transform: translateY(-1px) scale(1.03);
-}
-html[data-theme="light"] .panel-media .media-frame {
-  background: #fff;
-  border-color: var(--border-2);
 }
 
 @media (max-width: 900px) {
