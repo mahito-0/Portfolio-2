@@ -1,7 +1,7 @@
 /* ===================== THEME VARIABLES ===================== */
 /* Default: Dark theme */
 :root {
-  --bg: #242424;
+  --bg: #000000;
 
   --text-1: #f3f4f6;
   --text-2: #cbd5e1;
@@ -10,7 +10,7 @@
   --glass-card: rgba(255, 255, 255, 0);
   --glass-panel: rgba(255, 255, 255, 0);
 
-  --border-1: rgba(255,255,255,0.16);
+  --border-1: rgb(180, 178, 37);
   --border-2: rgba(255,255,255,0.10);
   --shadow-1: 0 18px 52px rgba(0,0,0,0.45);
   --radius: 16px;
@@ -35,7 +35,9 @@ img, video { max-width: 100%; height: auto; display: block; }
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
   color: var(--text-1);
   display: flex;
   justify-content: center;
@@ -105,7 +107,7 @@ body {
   opacity: 0; animation: fadeInUp 0.6s forwards;
   position: relative; overflow: hidden; cursor: pointer;
 
-  border: 1px solid var(--border-1);
+  border: 3px solid var(--border-1);
   background: var(--glass-card);
   box-shadow: var(--shadow-1);
 
