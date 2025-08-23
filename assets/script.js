@@ -1,3 +1,4 @@
+
 // ========= MAIN INITIALIZATION =========
 document.addEventListener('DOMContentLoaded', () => {
   setupResponsiveFontSize();
@@ -13,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', handleScrollEffects, { passive: true });
 
   createParticles();
-  setupGyroParallax(); // NEW: enable gyro parallax on supported mobile devices
+  setupGyroParallax(); // Gyro parallax on supported mobile devices
   initPanels();
-  setupSkillsCarousel(); // Initialize the skills carousel
-  setupChatWidget();     // Initialize AI chat widget (now properly exported)
+  setupSkillsCarousel();
+  setupChatWidget();
 
   // Recreate particles on resize (debounced)
   let resizeTimeout;
@@ -417,7 +418,7 @@ function setupImageModal() {
 
   function getTouchDist(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+       const dy = touches[0].clientY - touches[1].clientY;
     return Math.hypot(dx, dy);
   }
 }
@@ -551,7 +552,8 @@ function createParticles() {
   const parallaxScale  = Number(cfg.parallaxScale|| 1);
   const rmScale        = reduceMotion ? 0.35 : 1;
 
-  const baseCount = Math.round(((isSmall ? 60 : 120) * densityScale) * rmScale);
+  // 2x particles
+  const baseCount = Math.round(((isSmall ? 60 : 120) * densityScale) * rmScale * 2);
 
   const layers = [
     { fraction: 0.45, depth: 0.15, sizeMin: 0.8, sizeMax: 1.6, twinkleMin: 5.0, twinkleMax: 9.0 },
@@ -753,24 +755,21 @@ function setupGyroParallax() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
 
-  // Avoid rebinding
   if (window.__gyroInitialized) return;
   window.__gyroInitialized = true;
 
   const hasDeviceOrientation = 'DeviceOrientationEvent' in window;
 
-  // Helper to attach deviceorientation handler
   function attachOrientation() {
     if (window.__gyroAttached) return;
     if (!hasDeviceOrientation) return;
 
     const handler = (ev) => {
-      // Some browsers may provide null values initially
       let gamma = typeof ev.gamma === 'number' ? ev.gamma : null; // left-right [-90..90]
       let beta  = typeof ev.beta  === 'number' ? ev.beta  : null; // front-back [-180..180]
       if (gamma == null || beta == null) return;
 
-      // Adjust mapping in landscape (swap axes)
+      // Handle orientation rotation (swap axes in landscape)
       let angle = 0;
       try {
         angle = (typeof screen.orientation?.angle === 'number') ? screen.orientation.angle
@@ -780,17 +779,17 @@ function setupGyroParallax() {
         const t = gamma; gamma = beta; beta = t;
       }
 
-      // Map to [-1..1], with clamp/sensitivity
-      const clamp = 30; // degrees for normalization
+      // Normalize to [-1..1]
+      const clamp = 30; // degrees
       let px = Math.max(-1, Math.min(1, gamma / clamp));
-      let py = Math.max(-1, Math.min(1, -beta  / clamp)); // invert Y for natural feel
+      let py = Math.max(-1, Math.min(1, -beta  / clamp)); // invert for natural feel
 
-      // Low-pass smoothing
+      // Low-pass filter
       const container = document.getElementById('particles');
       if (!container) return;
       const gyro = container.__gyro || (container.__gyro = { active: false, parallaxX: 0, parallaxY: 0 });
 
-      const a = 0.12; // smoothing factor
+      const a = 0.12;
       gyro.parallaxX = gyro.parallaxX + (px - gyro.parallaxX) * a;
       gyro.parallaxY = gyro.parallaxY + (py - gyro.parallaxY) * a;
       gyro.active = true;
@@ -801,14 +800,14 @@ function setupGyroParallax() {
     window.__gyroHandler = handler;
   }
 
-  // iOS 13+ requires a permission request in a user gesture
+  // iOS 13+ permissions
   if (hasDeviceOrientation && typeof DeviceOrientationEvent.requestPermission === 'function') {
     const askOnce = () => {
       DeviceOrientationEvent.requestPermission()
         .then(state => {
           if (state === 'granted') attachOrientation();
         })
-        .catch(() => {}) // ignore
+        .catch(() => {})
         .finally(() => {
           document.removeEventListener('click', askOnce);
           document.removeEventListener('touchend', askOnce);
@@ -817,7 +816,6 @@ function setupGyroParallax() {
     document.addEventListener('click', askOnce, { once: true });
     document.addEventListener('touchend', askOnce, { once: true, passive: true });
   } else {
-    // Non-iOS or older versions: attach directly
     attachOrientation();
   }
 }
