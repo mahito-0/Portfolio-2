@@ -1,4 +1,3 @@
-
 // ========= MAIN INITIALIZATION =========
 document.addEventListener('DOMContentLoaded', () => {
   setupResponsiveFontSize();
@@ -13,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('scroll', handleScrollEffects, { passive: true });
 
+  // Ensure particles overlay covers the whole page on mobile
+  ensureParticlesOverlay(true); // true => apply on mobile only
   createParticles();
   setupGyroParallax(); // Gyro parallax on supported mobile devices
   initPanels();
@@ -23,7 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(createParticles, 200);
+    resizeTimeout = setTimeout(() => {
+      ensureParticlesOverlay(true);
+      createParticles();
+    }, 200);
     if (window.emailjs?.init) {
       emailjs.init("S1gRkblDQXsFDT-SG"); 
     }
@@ -418,7 +422,7 @@ function setupImageModal() {
 
   function getTouchDist(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
-       const dy = touches[0].clientY - touches[1].clientY;
+    const dy = touches[0].clientY - touches[1].clientY;
     return Math.hypot(dx, dy);
   }
 }
@@ -750,6 +754,33 @@ function spawnShootingStar(container) {
   setTimeout(() => star.remove(), 2600);
 }
 
+// ==================== FULL-PAGE OVERLAY FOR PARTICLES (mobile) ====================
+function ensureParticlesOverlay(mobileOnly = true) {
+  const el = document.getElementById('particles');
+  if (!el) return;
+
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (!mobileOnly || isMobile) {
+    // Move to body so it's not clipped by transformed ancestors (iOS quirk)
+    if (el.parentElement !== document.body) {
+      document.body.appendChild(el);
+    }
+    if (!el.__overlayApplied) {
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.right = '0';
+      el.style.bottom = '0';
+      el.style.width = '100vw';
+      el.style.height = '100vh'; // viewport overlay so it's visible across the whole page while scrolling
+      el.style.pointerEvents = 'none';
+      // Adjust if needed: keep below your UI; if it shows above elements, reduce z-index or raise your content
+      el.style.zIndex = '0';
+      el.__overlayApplied = true;
+    }
+  }
+}
+
 // ==================== GYRO PARALLAX (mobile tilt control) ====================
 function setupGyroParallax() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -784,7 +815,7 @@ function setupGyroParallax() {
       let px = Math.max(-1, Math.min(1, gamma / clamp));
       let py = Math.max(-1, Math.min(1, -beta  / clamp)); // invert for natural feel
 
-      // Low-pass filter
+      // Low-pass filter into container gyro state
       const container = document.getElementById('particles');
       if (!container) return;
       const gyro = container.__gyro || (container.__gyro = { active: false, parallaxX: 0, parallaxY: 0 });
