@@ -10,7 +10,7 @@
   --glass-card: rgba(255, 255, 255, 0);
   --glass-panel: rgba(255, 255, 255, 0);
 
-  --border-1: rgb(180, 178, 37);
+  --border-1: rgb(255, 255, 255);
   --border-2: rgba(255,255,255,0.10);
   --shadow-1: 0 18px 52px rgba(0,0,0,0.45);
   --radius: 16px;
@@ -107,7 +107,7 @@ body {
   opacity: 0; animation: fadeInUp 0.6s forwards;
   position: relative; overflow: hidden; cursor: pointer;
 
-  border: 3px solid var(--border-1);
+  border: 0.5px solid var(--border-1);
   background: var(--glass-card);
   box-shadow: var(--shadow-1);
 

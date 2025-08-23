@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', handleScrollEffects, { passive: true });
 
   createParticles();
+  setupGyroParallax(); // NEW: enable gyro parallax on supported mobile devices
   initPanels();
   setupSkillsCarousel(); // Initialize the skills carousel
   setupChatWidget();     // Initialize AI chat widget (now properly exported)
@@ -597,6 +598,10 @@ function createParticles() {
   const mouse = container.__mouse || { x: w / 2, y: h / 2, active: false, parallaxX: 0, parallaxY: 0 };
   container.__mouse = mouse;
 
+  // Gyro shared state (updated by setupGyroParallax or deviceorientation handler)
+  const gyro = container.__gyro || { active: false, parallaxX: 0, parallaxY: 0 };
+  container.__gyro = gyro;
+
   function updateMouseFromClient(clientX, clientY) {
     const rect = container.getBoundingClientRect();
     mouse.x = clientX - rect.left;
@@ -640,17 +645,22 @@ function createParticles() {
   const r2 = influenceRadius * influenceRadius;
 
   function step() {
+    // Use gyro when available and there's no current pointer interaction
+    const useGyro = (gyro && gyro.active && !mouse.active);
+    const px = useGyro ? gyro.parallaxX : mouse.parallaxX;
+    const py = useGyro ? gyro.parallaxY : mouse.parallaxY;
+
     for (let i = 0; i < stars.length; i++) {
       const s = stars[i];
 
       // Spring toward parallax-adjusted home
-      const targetX = s.homeX + mouse.parallaxX * (parallaxBase + parallaxDepthScale * s.depth);
-      const targetY = s.homeY + mouse.parallaxY * (parallaxBase + parallaxDepthScale * s.depth);
+      const targetX = s.homeX + px * (parallaxBase + parallaxDepthScale * s.depth);
+      const targetY = s.homeY + py * (parallaxBase + parallaxDepthScale * s.depth);
 
       s.vx += (targetX - s.x) * (0.003 + 0.003 * s.depth);
       s.vy += (targetY - s.y) * (0.003 + 0.003 * s.depth);
 
-      // Repel from cursor within radius
+      // Repel from cursor within radius (only when pointer active)
       if (mouse.active) {
         const dx = s.x - mouse.x;
         const dy = s.y - mouse.y;
@@ -736,6 +746,80 @@ function spawnShootingStar(container) {
 
   // Clean up after animation
   setTimeout(() => star.remove(), 2600);
+}
+
+// ==================== GYRO PARALLAX (mobile tilt control) ====================
+function setupGyroParallax() {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  // Avoid rebinding
+  if (window.__gyroInitialized) return;
+  window.__gyroInitialized = true;
+
+  const hasDeviceOrientation = 'DeviceOrientationEvent' in window;
+
+  // Helper to attach deviceorientation handler
+  function attachOrientation() {
+    if (window.__gyroAttached) return;
+    if (!hasDeviceOrientation) return;
+
+    const handler = (ev) => {
+      // Some browsers may provide null values initially
+      let gamma = typeof ev.gamma === 'number' ? ev.gamma : null; // left-right [-90..90]
+      let beta  = typeof ev.beta  === 'number' ? ev.beta  : null; // front-back [-180..180]
+      if (gamma == null || beta == null) return;
+
+      // Adjust mapping in landscape (swap axes)
+      let angle = 0;
+      try {
+        angle = (typeof screen.orientation?.angle === 'number') ? screen.orientation.angle
+              : (typeof window.orientation === 'number' ? window.orientation : 0);
+      } catch {}
+      if (Math.abs(angle) === 90) {
+        const t = gamma; gamma = beta; beta = t;
+      }
+
+      // Map to [-1..1], with clamp/sensitivity
+      const clamp = 30; // degrees for normalization
+      let px = Math.max(-1, Math.min(1, gamma / clamp));
+      let py = Math.max(-1, Math.min(1, -beta  / clamp)); // invert Y for natural feel
+
+      // Low-pass smoothing
+      const container = document.getElementById('particles');
+      if (!container) return;
+      const gyro = container.__gyro || (container.__gyro = { active: false, parallaxX: 0, parallaxY: 0 });
+
+      const a = 0.12; // smoothing factor
+      gyro.parallaxX = gyro.parallaxX + (px - gyro.parallaxX) * a;
+      gyro.parallaxY = gyro.parallaxY + (py - gyro.parallaxY) * a;
+      gyro.active = true;
+    };
+
+    window.addEventListener('deviceorientation', handler, { passive: true });
+    window.__gyroAttached = true;
+    window.__gyroHandler = handler;
+  }
+
+  // iOS 13+ requires a permission request in a user gesture
+  if (hasDeviceOrientation && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    const askOnce = () => {
+      DeviceOrientationEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') attachOrientation();
+        })
+        .catch(() => {}) // ignore
+        .finally(() => {
+          document.removeEventListener('click', askOnce);
+          document.removeEventListener('touchend', askOnce);
+        });
+    };
+    document.addEventListener('click', askOnce, { once: true });
+    document.addEventListener('touchend', askOnce, { once: true, passive: true });
+  } else {
+    // Non-iOS or older versions: attach directly
+    attachOrientation();
+  }
 }
 
 // ==================== PANELS ====================
