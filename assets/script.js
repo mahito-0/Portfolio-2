@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   createParticles();
   initPanels();
   setupSkillsCarousel(); // Initialize the skills carousel
-  setupChatWidget();    // Initialize AI chat widget
+  setupChatWidget();     // Initialize AI chat widget (now properly exported)
 
   // Recreate particles on resize (debounced)
   let resizeTimeout;
@@ -505,31 +505,237 @@ function loadGitHubContributions(username) {
   }
 }
 
-// ==================== PARTICLES ====================
+// ==================== SPACE FX CONTROLS (GLOBAL) ====================
+window.SpaceFX = window.SpaceFX || {
+  mode: 'balanced',        // 'chill' | 'balanced' | 'epic'
+  densityScale: 1.6,         // 0.5 .. 1.6
+  speedScale: 1.2,           // 0.8 .. 1.2+
+  parallaxScale: 1.3,        // 0.7 .. 1.3+
+  shootingStars: 'frequent'  // 'rare' | 'normal' | 'frequent'
+};
+
+window.setSpaceFX = function setSpaceFX(presetOrOptions = {}) {
+  const presets = {
+    chill:     { mode: 'chill',     densityScale: 0.65, speedScale: 0.85, parallaxScale: 0.7, shootingStars: 'rare' },
+    balanced:  { mode: 'balanced',  densityScale: 1.0,  speedScale: 1.0,  parallaxScale: 1.0, shootingStars: 'normal' },
+    epic:      { mode: 'epic',      densityScale: 1.6,  speedScale: 1.15, parallaxScale: 1.25, shootingStars: 'frequent' }
+  };
+
+  const opts = (typeof presetOrOptions === 'string') ? (presets[presetOrOptions] || {}) : presetOrOptions;
+  window.SpaceFX = { ...window.SpaceFX, ...opts };
+
+  try { createParticles(); } catch {}
+};
+
+// ==================== PARTICLES (interactive space background) ====================
 function createParticles() {
-  const particlesContainer = document.getElementById('particles');
-  if (!particlesContainer) return;
-  particlesContainer.innerHTML = '';
+  const container = document.getElementById('particles');
+  if (!container) return;
+
+  // Stop previous loop and timers, clear contents
+  if (container.__rafId) cancelAnimationFrame(container.__rafId);
+  if (window.__shootingStarTimer) clearInterval(window.__shootingStarTimer);
+  container.innerHTML = '';
+
   const isSmall = window.innerWidth <= 768;
-  const particleCount = isSmall ? 24 : 50;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.classList.add('particle');
-    const size = Math.random() * 3 + 1;
-    const posX = Math.random() * 100;
-    const posY = Math.random() * 100;
-    const delay = Math.random() * 5;
-    const duration = Math.random() * 5 + 5;
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || window.innerHeight;
 
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    particle.style.left = `${posX}%`;
-    particle.style.top = `${posY}%`;
-    particle.style.animationDelay = `${delay}s`;
-    particle.style.animationDuration = `${duration}s`;
-    particlesContainer.appendChild(particle);
+  // Config scales
+  const cfg = window.SpaceFX || {};
+  const densityScale   = Number(cfg.densityScale || 1);
+  const speedScale     = Number(cfg.speedScale   || 1);
+  const parallaxScale  = Number(cfg.parallaxScale|| 1);
+  const rmScale        = reduceMotion ? 0.35 : 1;
+
+  const baseCount = Math.round(((isSmall ? 60 : 120) * densityScale) * rmScale);
+
+  const layers = [
+    { fraction: 0.45, depth: 0.15, sizeMin: 0.8, sizeMax: 1.6, twinkleMin: 5.0, twinkleMax: 9.0 },
+    { fraction: 0.35, depth: 0.35, sizeMin: 1.0, sizeMax: 2.2, twinkleMin: 4.0, twinkleMax: 7.0 },
+    { fraction: 0.20, depth: 0.60, sizeMin: 1.2, sizeMax: 3.0, twinkleMin: 3.5, twinkleMax: 6.0 }
+  ];
+  const timeScale = 1 / (speedScale || 1);
+
+  const stars = [];
+  layers.forEach(layer => {
+    const count = Math.max(1, Math.round(baseCount * layer.fraction));
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'particle';
+
+      const size = Math.random() * (layer.sizeMax - layer.sizeMin) + layer.sizeMin;
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const delay = Math.random() * 5;
+      const duration = (Math.random() * (layer.twinkleMax - layer.twinkleMin) + layer.twinkleMin) * timeScale;
+
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.left = `0`;
+      el.style.top = `0`;
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+      if (!reduceMotion) {
+        el.style.animationDelay = `${delay}s`;
+        el.style.animationDuration = `${duration}s`;
+      } else {
+        el.style.animation = 'none';
+      }
+
+      container.appendChild(el);
+
+      stars.push({
+        el, x, y, vx: 0, vy: 0, homeX: x, homeY: y, depth: layer.depth
+      });
+    }
+  });
+
+  // Mouse/touch tracking shared state
+  const mouse = container.__mouse || { x: w / 2, y: h / 2, active: false, parallaxX: 0, parallaxY: 0 };
+  container.__mouse = mouse;
+
+  function updateMouseFromClient(clientX, clientY) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = clientX - rect.left;
+    mouse.y = clientY - rect.top;
+    mouse.parallaxX = (clientX / window.innerWidth - 0.5) * 2; // -1 .. 1
+    mouse.parallaxY = (clientY / window.innerHeight - 0.5) * 2;
   }
+
+  // Bind events once
+  if (!container.__eventsBound) {
+    window.addEventListener('mousemove', (e) => {
+      mouse.active = true;
+      updateMouseFromClient(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener('mouseout', () => { mouse.active = false; }, { passive: true });
+
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        mouse.active = true;
+        updateMouseFromClient(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        updateMouseFromClient(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { mouse.active = false; }, { passive: true });
+
+    container.__eventsBound = true;
+  }
+
+  // Parallax + interaction
+  const parallaxBase = 30 * parallaxScale;
+  const parallaxDepthScale = 50 * parallaxScale;
+
+  const influenceRadius = (isSmall ? 100 : 160) * parallaxScale;
+  const r2 = influenceRadius * influenceRadius;
+
+  function step() {
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+
+      // Spring toward parallax-adjusted home
+      const targetX = s.homeX + mouse.parallaxX * (parallaxBase + parallaxDepthScale * s.depth);
+      const targetY = s.homeY + mouse.parallaxY * (parallaxBase + parallaxDepthScale * s.depth);
+
+      s.vx += (targetX - s.x) * (0.003 + 0.003 * s.depth);
+      s.vy += (targetY - s.y) * (0.003 + 0.003 * s.depth);
+
+      // Repel from cursor within radius
+      if (mouse.active) {
+        const dx = s.x - mouse.x;
+        const dy = s.y - mouse.y;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < r2 && d2 > 0.0001) {
+          const dist = Math.sqrt(d2);
+          const force = (1 - dist / influenceRadius) * (0.65 + 0.5 * s.depth);
+          s.vx += (dx / dist) * force * 1.2;
+          s.vy += (dy / dist) * force * 1.2;
+        }
+      }
+
+      // Damping and speed cap (mildly affected by speedScale)
+      s.vx *= 0.92;
+      s.vy *= 0.92;
+
+      const speedBump = 0.85 + 0.3 * (speedScale - 1); // ~0.85..1.15
+      const maxSpeed = (1.8 + 1.4 * s.depth) * speedBump;
+      const vmag = Math.hypot(s.vx, s.vy);
+      if (vmag > maxSpeed) {
+        const f = maxSpeed / vmag;
+        s.vx *= f; s.vy *= f;
+      }
+
+      s.x += s.vx;
+      s.y += s.vy;
+
+      // Soft bounds
+      if (s.x < -10) { s.x = -10; s.vx *= -0.4; }
+      if (s.x > w + 10) { s.x = w + 10; s.vx *= -0.4; }
+      if (s.y < -10) { s.y = -10; s.vy *= -0.4; }
+      if (s.y > h + 10) { s.y = h + 10; s.vy *= -0.4; }
+
+      s.el.style.transform = `translate3d(${s.x}px, ${s.y}px, 0)`;
+    }
+
+    container.__rafId = requestAnimationFrame(step);
+  }
+
+  if (!reduceMotion) {
+    step();
+  }
+
+  // Shooting stars cadence
+  let rate;
+  const mode = (cfg.shootingStars || 'normal');
+  if (reduceMotion) {
+    rate = Infinity; // no shooting stars
+  } else {
+    const map = {
+      rare: isSmall ? 6500 : 8000,
+      normal: isSmall ? 4500 : 3000,
+      frequent: isSmall ? 2200 : 1500
+    };
+    rate = map[mode] ?? map.normal;
+  }
+
+  if (isFinite(rate)) {
+    window.__shootingStarTimer = setInterval(() => spawnShootingStar(container), rate);
+  }
+}
+
+function spawnShootingStar(container) {
+  const star = document.createElement('div');
+  star.className = 'shooting-star';
+
+  // Randomized direction and path
+  const direction = Math.random() < 0.55 ? 'ltr' : 'rtl';
+  const startY = Math.random() * 60 + 10; // 10%–70% vh
+  const rotate = direction === 'ltr' ? (-15 + Math.random() * 10) : (165 + Math.random() * 10);
+  const dx = direction === 'ltr' ? '120vw' : '-120vw';
+  const dy = (Math.random() * 40 - 10) + 'vh';
+  const len = Math.round(90 + Math.random() * 140) + 'px';
+
+  star.style.top = startY + 'vh';
+  star.style.left = direction === 'ltr' ? '-20vw' : '120vw';
+  star.style.setProperty('--rot', rotate + 'deg');
+  star.style.setProperty('--dx', dx);
+  star.style.setProperty('--dy', dy);
+  star.style.setProperty('--len', len);
+
+  container.appendChild(star);
+
+  // Clean up after animation
+  setTimeout(() => star.remove(), 2600);
 }
 
 // ==================== PANELS ====================
@@ -615,13 +821,11 @@ function setupSkillsCarousel() {
   const CONFIG_URL = 'assets/chat-config.json';
   const DATA_URL   = 'assets/site-data.json';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  // Exported initializer (called in DOMContentLoaded above)
+  window.setupChatWidget = async function setupChatWidget() {
     if (window.__chatWidgetBound) return;
     window.__chatWidgetBound = true;
-    setupChatWidget().catch(err => console.error('Chat init failed:', err));
-  });
 
-  async function setupChatWidget() {
     // DOM
     const panel   = document.getElementById('chat-panel');
     const toggle  = document.getElementById('chat-toggle');
@@ -795,5 +999,5 @@ function setupSkillsCarousel() {
         setBusy(false);
       }
     });
-  }
+  };
 })();
