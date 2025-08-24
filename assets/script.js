@@ -15,7 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ensure particles overlay covers the whole page on mobile
   ensureParticlesOverlay(true); // true => apply on mobile only
   createParticles();
-  setupGyroParallax(); // Gyro parallax on supported mobile devices
+
+  // Robust gyro: iOS permission UI + Android fallback
+  setupGyroParallax();
+
   initPanels();
   setupSkillsCarousel();
   setupChatWidget();
@@ -170,7 +173,7 @@ async function fetchGitHubProjects(username) {
     if (response.status === 403) {
       const reset = response.headers.get('x-ratelimit-reset');
       const resetDate = reset ? new Date(parseInt(reset, 10) * 1000) : null;
-      const msg = resetDate ? `GitHub API rate limit exceeded. Try again after ${resetDate.toLocaleTimeString()}.` : 'GitHub API rate limit exceeded. Try again later.';
+      const msg = resetDate ? `GitHub API rate limit exceeded. Try again after ${resetDate.toLocaleTimeString()}.` : 'GitHub API rate limit exceeded. Try again later';
 
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -422,7 +425,7 @@ function setupImageModal() {
 
   function getTouchDist(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+       const dy = touches[0].clientY - touches[1].clientY;
     return Math.hypot(dx, dy);
   }
 }
@@ -514,16 +517,16 @@ function loadGitHubContributions(username) {
 // ==================== SPACE FX CONTROLS (GLOBAL) ====================
 window.SpaceFX = window.SpaceFX || {
   mode: 'balanced',        // 'chill' | 'balanced' | 'epic'
-  densityScale: 1.6,         // 0.5 .. 1.6
-  speedScale: 1.2,           // 0.8 .. 1.2+
-  parallaxScale: 1.3,        // 0.7 .. 1.3+
-  shootingStars: 'frequent'  // 'rare' | 'normal' | 'frequent'
+  densityScale: 1.6,       // 0.5 .. 1.6
+  speedScale: 1.2,         // 0.8 .. 1.2+
+  parallaxScale: 1.3,      // 0.7 .. 1.3+
+  shootingStars: 'frequent'// 'rare' | 'normal' | 'frequent'
 };
 
 window.setSpaceFX = function setSpaceFX(presetOrOptions = {}) {
   const presets = {
-    chill:     { mode: 'chill',     densityScale: 0.65, speedScale: 0.85, parallaxScale: 0.7, shootingStars: 'rare' },
-    balanced:  { mode: 'balanced',  densityScale: 1.0,  speedScale: 1.0,  parallaxScale: 1.0, shootingStars: 'normal' },
+    chill:     { mode: 'chill',     densityScale: 0.65, speedScale: 0.85, parallaxScale: 0.7,  shootingStars: 'rare' },
+    balanced:  { mode: 'balanced',  densityScale: 1.0,  speedScale: 1.0,  parallaxScale: 1.0,  shootingStars: 'normal' },
     epic:      { mode: 'epic',      densityScale: 1.6,  speedScale: 1.15, parallaxScale: 1.25, shootingStars: 'frequent' }
   };
 
@@ -604,7 +607,7 @@ function createParticles() {
   const mouse = container.__mouse || { x: w / 2, y: h / 2, active: false, parallaxX: 0, parallaxY: 0 };
   container.__mouse = mouse;
 
-  // Gyro shared state (updated by setupGyroParallax or deviceorientation handler)
+  // Gyro shared state (updated by setupGyroParallax)
   const gyro = container.__gyro || { active: false, parallaxX: 0, parallaxY: 0 };
   container.__gyro = gyro;
 
@@ -644,8 +647,9 @@ function createParticles() {
   }
 
   // Parallax + interaction
-  const parallaxBase = 30 * parallaxScale;
-  const parallaxDepthScale = 50 * parallaxScale;
+  const rmParallax = reduceMotion ? 0.6 : 1; // gentler if user prefers reduced motion
+  const parallaxBase = 30 * parallaxScale * rmParallax;
+  const parallaxDepthScale = 50 * parallaxScale * rmParallax;
 
   const influenceRadius = (isSmall ? 100 : 160) * parallaxScale;
   const r2 = influenceRadius * influenceRadius;
@@ -679,7 +683,7 @@ function createParticles() {
         }
       }
 
-      // Damping and speed cap (mildly affected by speedScale)
+      // Damping and speed cap
       s.vx *= 0.92;
       s.vy *= 0.92;
 
@@ -706,15 +710,14 @@ function createParticles() {
     container.__rafId = requestAnimationFrame(step);
   }
 
-  if (!reduceMotion) {
-    step();
-  }
+  // Always run the loop (gentler when reduce-motion is set)
+  step();
 
   // Shooting stars cadence
   let rate;
   const mode = (cfg.shootingStars || 'normal');
   if (reduceMotion) {
-    rate = Infinity; // no shooting stars
+    rate = Infinity; // disable shooting stars if user prefers reduced motion
   } else {
     const map = {
       rare: isSmall ? 6500 : 8000,
@@ -783,19 +786,28 @@ function ensureParticlesOverlay(mobileOnly = true) {
 
 // ==================== GYRO PARALLAX (mobile tilt control) ====================
 function setupGyroParallax() {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
-
   if (window.__gyroInitialized) return;
   window.__gyroInitialized = true;
 
   const hasDeviceOrientation = 'DeviceOrientationEvent' in window;
+  const hasDeviceMotion = 'DeviceMotionEvent' in window;
+
+  const needsPermission =
+    (hasDeviceOrientation && typeof DeviceOrientationEvent.requestPermission === 'function') ||
+    (hasDeviceMotion && typeof DeviceMotionEvent.requestPermission === 'function');
+
+  const isSecure = window.isSecureContext || location.protocol === 'https:';
+  if (!isSecure) {
+    console.warn('Device orientation requires HTTPS. Serve the site over https:// for gyro to work.');
+  }
 
   function attachOrientation() {
-    if (window.__gyroAttached) return;
-    if (!hasDeviceOrientation) return;
+    if (window.__gyroAttached || !hasDeviceOrientation) return;
 
     const handler = (ev) => {
+      if (!ev) return;
+      window.__orientationUpdated = true;
+
       let gamma = typeof ev.gamma === 'number' ? ev.gamma : null; // left-right [-90..90]
       let beta  = typeof ev.beta  === 'number' ? ev.beta  : null; // front-back [-180..180]
       if (gamma == null || beta == null) return;
@@ -831,24 +843,117 @@ function setupGyroParallax() {
     window.__gyroHandler = handler;
   }
 
-  // iOS 13+ permissions
-  if (hasDeviceOrientation && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    const askOnce = () => {
-      DeviceOrientationEvent.requestPermission()
-        .then(state => {
-          if (state === 'granted') attachOrientation();
-        })
-        .catch(() => {})
-        .finally(() => {
-          document.removeEventListener('click', askOnce);
-          document.removeEventListener('touchend', askOnce);
-        });
+  function attachMotionFallback() {
+    if (window.__motionAttached || !hasDeviceMotion) return;
+
+    const handler = (ev) => {
+      if (!ev) return;
+      const acc = ev.accelerationIncludingGravity || ev.acceleration;
+      if (!acc) return;
+
+      const g = 9.81;
+      let ax = typeof acc.x === 'number' ? acc.x : 0;
+      let ay = typeof acc.y === 'number' ? acc.y : 0;
+
+      // Normalize to [-1..1]
+      let px = Math.max(-1, Math.min(1, ax / g));
+      let py = Math.max(-1, Math.min(1, -ay / g));
+
+      // Adjust axes in landscape
+      let angle = 0;
+      try {
+        angle = (typeof screen.orientation?.angle === 'number') ? screen.orientation.angle
+              : (typeof window.orientation === 'number' ? window.orientation : 0);
+      } catch {}
+      if (Math.abs(angle) === 90) {
+        const t = px; px = py; py = t;
+      }
+
+      const container = document.getElementById('particles');
+      if (!container) return;
+      const gyro = container.__gyro || (container.__gyro = { active: false, parallaxX: 0, parallaxY: 0 });
+
+      const a = 0.12;
+      gyro.parallaxX = gyro.parallaxX + (px - gyro.parallaxX) * a;
+      gyro.parallaxY = gyro.parallaxY + (py - gyro.parallaxY) * a;
+      gyro.active = true;
     };
-    document.addEventListener('click', askOnce, { once: true });
-    document.addEventListener('touchend', askOnce, { once: true, passive: true });
+
+    window.addEventListener('devicemotion', handler, { passive: true });
+    window.__motionAttached = true;
+    window.__motionHandler = handler;
+  }
+
+  async function requestIOSPermission() {
+    let granted = true;
+    try {
+      if (hasDeviceMotion && typeof DeviceMotionEvent.requestPermission === 'function') {
+        const s = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+        granted = granted && (s === 'granted');
+      }
+    } catch {}
+    try {
+      if (hasDeviceOrientation && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const s = await DeviceOrientationEvent.requestPermission().catch(() => 'denied');
+        granted = granted && (s === 'granted');
+      }
+    } catch {}
+    return granted;
+  }
+
+  function showMotionButton() {
+    if (document.getElementById('enable-motion-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'enable-motion-btn';
+    btn.type = 'button';
+    btn.textContent = 'Enable Motion';
+    Object.assign(btn.style, {
+      position:'fixed', bottom:'16px', right:'16px', zIndex:'9999', padding:'10px 14px',
+      borderRadius:'8px', border:'1px solid rgba(255,255,255,0.25)', color:'#fff',
+      background:'linear-gradient(135deg, rgba(59,130,246,.8), rgba(236,72,153,.8))',
+      backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)', cursor:'pointer'
+    });
+    btn.addEventListener('click', async () => {
+      const ok = await requestIOSPermission();
+      if (ok) {
+        attachOrientation();
+        // Also attach fallback in case orientation is blocked
+        setTimeout(() => { if (!window.__orientationUpdated) attachMotionFallback(); }, 800);
+        btn.remove();
+      } else {
+        btn.textContent = 'Motion permission denied';
+        setTimeout(() => btn.remove(), 2200);
+      }
+    });
+    document.body.appendChild(btn);
+  }
+
+  if (needsPermission) {
+    const trigger = async () => {
+      const ok = await requestIOSPermission();
+      if (ok) {
+        attachOrientation();
+        setTimeout(() => { if (!window.__orientationUpdated) attachMotionFallback(); }, 800);
+      } else {
+        showMotionButton();
+      }
+    };
+    document.addEventListener('click', trigger, { once: true });
+    document.addEventListener('touchend', trigger, { once: true, passive: true });
+    // Also show the button if user never taps the page body
+    setTimeout(showMotionButton, 1200);
   } else {
     attachOrientation();
+    // Attach fallback if orientation doesn’t fire
+    setTimeout(() => { if (!window.__orientationUpdated) attachMotionFallback(); }, 1500);
   }
+
+  // Pause effect when tab not visible
+  document.addEventListener('visibilitychange', () => {
+    const active = document.visibilityState === 'visible';
+    const container = document.getElementById('particles');
+    if (container && container.__gyro) container.__gyro.active = active;
+  });
 }
 
 // ==================== PANELS ====================
