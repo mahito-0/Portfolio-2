@@ -436,41 +436,6 @@ h2 {
 }
 @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.9; } }
 
-/* Shooting stars */
-.shooting-star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: var(--star-light);
-  border-radius: 50%;
-  transform: translate3d(0, 0, 0) rotate(var(--rot, 10deg));
-  animation: shooting 2.3s cubic-bezier(.25, .1, .25, 1) forwards;
-  opacity: 0;
-  filter: drop-shadow(0 0 6px rgba(255,255,255,0.6));
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-.shooting-star::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--len, 160px);
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0));
-  border-radius: 2px;
-}
-@keyframes shooting {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) rotate(var(--rot, -20deg));
-  }
-  10% { opacity: 1; }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--dx, 120vw), var(--dy, 0), 0) rotate(var(--rot, -20deg));
-  }
-}
 
 /* ===================== IMAGE MODAL ===================== */
 #img-modal {
