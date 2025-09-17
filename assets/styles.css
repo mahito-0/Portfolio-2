@@ -198,7 +198,7 @@ body {
 .panel-content h3 {
   color: var(--text-1); margin-top: 10px ; margin-bottom: 6px;
   font-weight: 600; font-size: 1.3rem;
-  font-family: 'Orbitron', sans-serif; font-size: 1.15rem;
+  font-family: 'Orbitron', sans-serif; font-size: 1.15rem; 
 }
 .panel-content p { margin-bottom: 0px; }
 /* Only color normal links inside panels, not social buttons */
@@ -309,6 +309,15 @@ h2 {
 .stars { color: var(--badge-gold); }
 .forks { color: var(--badge-green); }
 .dates { color: var(--badge-blue); }
+
+
+
+#contributions-grid img {
+  width: 150%; /* Make the image 150% of its container */
+  object-fit: contain; /* Ensure the image scales properly without cropping */
+  display: block; /* Make it a block element to apply margin auto */
+  margin: 0 auto; /* Center horizontally */
+}
 
 
 /* ===================== SOCIAL LINKS ===================== */
@@ -481,21 +490,6 @@ h2 {
   min-height: 44px; touch-action: manipulation;
 }
 .result-message { display: none; color: var(--badge-green); font-weight: 600; }
-
-/* ===================== THEME TOGGLE ===================== */
-.theme-toggle {
-  position: fixed;
-  right: 16px;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  z-index: 1100;
-  width: 48px; height: 48px; border-radius: 50%;
-  display: grid; place-items: center; cursor: pointer;
-  border: 1px solid var(--border-1);
-  background: var(--glass-card);
-  color: var(--text-1);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.28);
-}
-.theme-toggle:hover { transform: translateY(-2px); }
 
 /* ===================== FOCUS ===================== */
 a:focus-visible, button:focus-visible, .card:focus-visible, .social-link:focus-visible, .theme-toggle:focus-visible {
@@ -894,4 +888,15 @@ a:focus-visible, button:focus-visible, .card:focus-visible, .social-link:focus-v
     left: max(16px, env(safe-area-inset-left));
     right: max(16px, env(safe-area-inset-right));
   }
+}
+
+#contributions-grid img {
+  width: 150%; /* Make the image 150% of its container */
+  object-fit: contain; /* Ensure the image scales properly without cropping */
+  display: block; /* Make it a block element to apply margin auto */
+  margin: 0 auto; /* Center horizontally */
+}
+
+#githubpanel.panel-content h3 {
+  text-align: center;
 }
