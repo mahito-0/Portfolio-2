@@ -52,8 +52,8 @@ Feel free to browse through the different sections of the portfolio. The AI chat
 Syed Al Mahmud
 
 *   **Email:** [mahmud.agni@gmail.com](mailto:mahmud.agni@gmail.com)
-*   **LinkedIn:** [https://www.linkedin.com/in/syed-al-mahmud-45a671296/](https://www.linkedin.com/in/syed-al-mahmud-45a671296/)
-*   **GitHub:** [https://github.com/mahito-0](https://github.com/mahito-0)
+*   **LinkedIn:** [Syed Al Mahmud](https://www.linkedin.com/in/syed-al-mahmud-45a671296/)
+*   **GitHub:** [mahito-0](https://github.com/mahito-0)
 
 ## License
 
